@@ -34,7 +34,7 @@ A JavaScript + Python like array in C++.
 | `a += b`       | *O(n)*   | Concantenates two arrays and assigns it to `a`. |
 | `a * n`        | *O(n^2)* | Repeats the values in this array by `n` times. |
 | `a *= n`       | *O(n^2)* | Repeats the values in this array by `n` times and assigns it to `a`. |
-| ostream << `a` | *O(n)*   | Outputs the contents of the array to the given output stream. |
+| `ostream << a` | *O(n)*   | Outputs the contents of the array to the given output stream. |
 
 ## Example
 
