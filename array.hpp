@@ -221,19 +221,7 @@ public:
    * Outputs the contents of the array to the given output stream.
    */
   friend ostream& operator << (ostream& os, const Array<T>& array) {
-    string seperator = ", ";
-    string result = "";
-
-    for(auto i = 0; i < array.length(); i++) {
-      if (i == array.length() - 1) {
-        seperator = "";
-      }
-
-      result += (array_utils::to_string(array.operator[](i)) + seperator);
-    }
-
-    os  << "[" << result << "]";
-
+    os  << "[ " << array.join(", ") << " ]";
     return os;
   }
   
@@ -489,8 +477,8 @@ public:
    */
   string join(const string& seperator) const {
     string result = "";
-    this->for_each([&] (T x) {
-      result += (((string) x) + seperator);
+    this->for_each([&] (T x, auto i) {
+      result += (array_utils::to_string(x) + ((i == length() - 1) ? "" : seperator));
     });
     return result;
   }
