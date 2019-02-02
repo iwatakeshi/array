@@ -2,10 +2,12 @@
 #define ARRAY_H
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <typeinfo>
 #include <stdexcept>
+#include <algorithm>
 
 using std::function;
 using std::ostream;
@@ -160,9 +162,16 @@ public:
    */
   Array<T> operator + (Array<T> const& right) {
     Array<T> temp;
+
+    for(auto i = offset_; i < length_; i++) {
+      temp.push(array_[i]);
+    }
+    
+
     for (auto i = right.offset_; i < right.length_; i++) {
       temp.push(right.array_[i]);
     }
+
     return temp;
   }
 
@@ -222,8 +231,13 @@ public:
    */
   void unshift(T const& value) {
     // Determine if the array is full
-    auto size = (size_ == 0) ? 1 : 
-      is_full() ? 2 * size_ : length() + 1;
+    auto size = 0;
+    if (size_ == 0) {
+      reserve(std::max((uint64_t) 1, (uint64_t) (size_ * 2)), false);
+    } else {
+      reserve(is_full() ? 2 * size_ : length() + 1, true);
+    }
+
     T * array = new T[size];
     
     array[0] = value;
@@ -258,10 +272,10 @@ public:
    */
   void push(T const& value) {
     // Determine if the array is full
-    if (is_full()) {
-      auto size = size_ == 0 ? 1 : 2 * size_;
-      auto copy = size_ == 0 ? false : true;
-      reserve(size, copy);
+    if (size_ == 0) {
+      reserve(std::max((uint64_t) 1, (uint64_t) size_ * 2), false);
+    } else {
+      reserve(is_full() ? 2 * size_ : length() + 1, true);
     }
 
     array_[length()] = value;
