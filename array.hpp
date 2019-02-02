@@ -233,9 +233,9 @@ public:
     // Determine if the array is full
     auto size = 0;
     if (size_ == 0) {
-      reserve(std::max((uint64_t) 1, (uint64_t) (size_ * 2)), false);
+      size = std::max((uint64_t) 1, (uint64_t) (size_ * 2));
     } else {
-      reserve(is_full() ? 2 * size_ : length() + 1, true);
+      size = is_full() ? 2 * size_ : length() + 1;
     }
 
     T * array = new T[size];
