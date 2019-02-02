@@ -274,8 +274,8 @@ public:
     // Determine if the array is full
     if (size_ == 0) {
       reserve(std::max((uint64_t) 1, (uint64_t) size_ * 2), false);
-    } else {
-      reserve(is_full() ? 2 * size_ : length() + 1, true);
+    } else if (is_full()) {
+      reserve(2 * size_, true);
     }
 
     array_[length()] = value;
