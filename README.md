@@ -1,6 +1,41 @@
 # array-cpp
 A JavaScript + Python like array in C++.
 
+
+## API
+
+### `Array<T>`
+
+| Constructor  | Performance  | Description  |
+|---|---|---|
+| `Array()` | *O(1)* | Initializes a new empty array.  |
+| `Array(n)`| *O(n)* | Initializes a new array storing `n` copies of zeroes.  |
+
+| Method  |  Performance  |  Description  |
+|---|---|---|
+| `unshift(value): void`                         | *O(n)* | Adds a new value to the beginning of this array.  |
+| `shift(): T`                                   | *O(1)* | Removes the value from the beginning of this array and returns it.  |
+| `push(value): void`                            | *O(1)* | Adds a new value to the end of this array.  |
+| `pop(value): T`                                | *O(1)* | Removes the value from the end of this array and returns it.  |
+| `for_each((value, index?) -> void): void`      | *O(n)* | Iterates through each value in this array. |
+| `filter((value, index?) -> bool): Array<T>`    | *O(n)* | Filters this array and returns a new array based on a condition. |
+| `map((value, index?) -> T): Array<T>`          | *O(n)* | Maps each value in this array and returns a new array of type `T`. |
+| `map<U>((value, index?) -> T): Array<U>`       | *O(n)* | Maps each value in this array and returns a new array of type `U`. |
+| `reverse(): Array<T>`                          | *O(n)* | Reverses the values in this array and returns a new array. |
+| `join(): string`                               | *O(n)* | Returns a string of this array using `,` as the default seperator. |
+| `join(seperator): string`                      | *O(n)* | Returns a string of this array using a provided seperator. |
+| `length(): int`                                | *O(1)* | Returns the number of elements in this array. |
+| `is_empty(): int`                              | *O(1)* | Returns **true** if this array is empty. |
+
+|  Operator  |  Performance  |  Description  |
+|---|---|---|
+| `a[index]`     | *O(1)*   | Overloads **[]** to select elements from this array. |
+| `a + b`        | *O(n)*   | Concantenates two arrays. |
+| `a += b`       | *O(n)*   | Concantenates two arrays and assigns it to `a`. |
+| `a * n`        | *O(n^2)* | Repeats the values in this array by `n` times. |
+| `a *= n`       | *O(n^2)* | Repeats the values in this array by `n` times and assigns it to `a`. |
+| ostream << `a` | *O(n)*   | Outputs the contents of the array to the given output stream. |
+
 ## Example
 
 ```cpp
