@@ -36,5 +36,22 @@ int main() {
   a.unshift(100);
 
   cout << "a: " << a << endl;
+  
+  a.unshift(200);
+
+  cout << "a: " << a << endl;
+
+  a[0] = 1;
+
+  cout << "a: " << a << endl;
+
+  cout << a.reduce([](auto accumulator, auto current) -> int {
+    return accumulator + current;
+  }) << endl;
+
+  cout << a.map([](auto value) {
+    return value * 2;
+  }) << endl;
+
   return 0;
 }
