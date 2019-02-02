@@ -47,6 +47,11 @@ int main() {
 
   // Repeat the elements 'n' times
   cout << "b * 3: " << b * 3 << endl;
+
+  // Insert the element to the front of the list
+  a.unshift(100);
+
+  cout << "a: " << a << endl;
   return 0;
 }
 ```
