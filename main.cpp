@@ -32,5 +32,9 @@ int main() {
 
 
   cout << "b * 3: " << b * 3 << endl;
+
+  a.unshift(100);
+
+  cout << "a: " << a << endl;
   return 0;
 }
