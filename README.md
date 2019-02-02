@@ -13,19 +13,22 @@ A JavaScript + Python like array in C++.
 
 | Method  |  Performance  |  Description  |
 |---|---|---|
-| `unshift(value): void`                         | *O(n)* | Adds a new value to the beginning of this array.  |
-| `shift(): T`                                   | *O(1)* | Removes the value from the beginning of this array and returns it.  |
-| `push(value): void`                            | *O(1)* | Adds a new value to the end of this array.  |
-| `pop(value): T`                                | *O(1)* | Removes the value from the end of this array and returns it.  |
-| `for_each((value, index?) -> void): void`      | *O(n)* | Iterates through each value in this array. |
-| `filter((value, index?) -> bool): Array<T>`    | *O(n)* | Filters this array and returns a new array based on a condition. |
-| `map((value, index?) -> T): Array<T>`          | *O(n)* | Maps each value in this array and returns a new array of type `T`. |
-| `map<U>((value, index?) -> T): Array<U>`       | *O(n)* | Maps each value in this array and returns a new array of type `U`. |
-| `reverse(): Array<T>`                          | *O(n)* | Reverses the values in this array and returns a new array. |
-| `join(): string`                               | *O(n)* | Returns a string of this array using `,` as the default seperator. |
-| `join(seperator): string`                      | *O(n)* | Returns a string of this array using a provided seperator. |
-| `length(): int`                                | *O(1)* | Returns the number of elements in this array. |
-| `is_empty(): int`                              | *O(1)* | Returns **true** if this array is empty. |
+| `unshift(value): void`                                          | *O(n)* | Adds a new value to the beginning of this array.  |
+| `shift(): T`                                                    | *O(1)* | Removes the value from the beginning of this array and returns it.  |
+| `push(value): void`                                             | *O(1)* | Adds a new value to the end of this array.  |
+| `pop(value): T`                                                 | *O(1)* | Removes the value from the end of this array and returns it.  |
+| `for_each((value, index?) -> void): void`                       | *O(n)* | Iterates through each value in this array. |
+| `filter((value, index?) -> bool): Array<T>`                     | *O(n)* | Filters this array and returns a new array based on a condition. |
+| `map((value, index?) -> T): Array<T>`                           | *O(n)* | Maps each value in this array and returns a new array of type `T`. |
+| `map<U>((value, index?) -> T): Array<U>`                        | *O(n)* | Maps each value in this array and returns a new array of type `U`. |
+| `reduce((accumulator, current, index?) -> T): T`                | *O(n)* | Reduces the values in this array into a single output value of type `T`. |
+| `reduce((accumulator, current, index?) -> T, initial): T`       | *O(n)* | Reduces the values in this array into a single output value of type `T`. |
+| `reduce<U>((accumulator, current, index?) -> U, initital): U`   | *O(n)* | Reduces the values in this array into a single output value of type `U`. |
+| `reverse(): Array<T>`                                           | *O(n)* | Reverses the values in this array and returns a new array. |
+| `join(): string`                                                | *O(n)* | Returns a string of this array using `,` as the default seperator. |
+| `join(seperator): string`                                       | *O(n)* | Returns a string of this array using a provided seperator. |
+| `length(): int`                                                 | *O(1)* | Returns the number of elements in this array. |
+| `is_empty(): int`                                               | *O(1)* | Returns **true** if this array is empty. |
 
 |  Operator  |  Performance  |  Description  |
 |---|---|---|
