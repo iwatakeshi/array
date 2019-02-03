@@ -115,6 +115,17 @@ public:
     length_ = other.length_;
   }
 
+  /**
+   * 	Initializes a new array with list initialization.
+   */
+  Array(std::initializer_list<T> const& list) {
+    reserve(list.size(), false);
+
+    for(auto element : list) {
+      this->push(element);
+    }
+  }
+
   ~Array() {
     delete [] array_;
     offset_ = 0;
@@ -162,6 +173,25 @@ public:
     for (auto i = 0; i < size_; i++) {
       array_[i] = right.array_[i];
     }
+
+    return *this;
+  }
+
+  /**
+   * Assigns this array with the array on the right hand side.
+   */
+  Array<T>& operator = (std::initializer_list<T> const& list) {
+    T * temp = new T[list.size()];
+    auto index = 0;
+    for(auto element : list) {
+      temp[index++] = element;
+    }
+    
+    delete [] array_;
+    array_ = temp;
+    size_ = list.size();
+    length_ = size_;
+    offset_ = 0;
 
     return *this;
   }
