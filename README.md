@@ -8,8 +8,9 @@ A JavaScript + Python like array in C++.
 
 | Constructor  | Performance  | Description  |
 |---|---|---|
-| `Array()` | *O(1)* | Initializes a new empty array.  |
-| `Array(n)`| *O(n)* | Initializes a new array storing `n` copies of zeroes.  |
+| `Array()`     | *O(1)* | Initializes a new empty array.  |
+| `Array(n)`    | *O(1)* | Initializes a new array of size `n`.  |
+| `Array(list)` | *O(n)* | Initializes a new array with list initialization. |
 
 | Method  |  Performance  |  Description  |
 |---|---|---|
@@ -35,6 +36,7 @@ A JavaScript + Python like array in C++.
 | `a[index]`     | *O(1)*   | Overloads **[]** to select elements from this array. |
 | `a + b`        | *O(n)*   | Concantenates two arrays. |
 | `a += b`       | *O(n)*   | Concantenates two arrays and assigns it to `a`. |
+| `a = { 1 } `   | *O(n)*   | Assigns the values in a list to `a`. |
 | `a * n`        | *O(n^2)* | Repeats the values in this array by `n` times. |
 | `a *= n`       | *O(n^2)* | Repeats the values in this array by `n` times and assigns it to `a`. |
 | `ostream << a` | *O(n)*   | Outputs the contents of the array to the given output stream. |
