@@ -53,5 +53,11 @@ int main() {
     return value * 2;
   }) << endl;
 
+  Array<int> d;
+
+  d = { 1, 2, 3, 4 };
+
+  cout << d << endl;
+
   return 0;
 }
