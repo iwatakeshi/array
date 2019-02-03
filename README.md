@@ -1,10 +1,8 @@
-# array-cpp
+# `Array<T>`
 A JavaScript + Python like array in C++.
 
 
 ## API
-
-### `Array<T>`
 
 | Constructor  | Performance  | Description  |
 |---|---|---|
