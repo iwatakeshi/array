@@ -109,7 +109,7 @@ public:
   /**
    * 	Initializes a new array storing n copies of the given value.
    */
-  Array(uint64_t size, T value = T{}): Array(size) {
+  Array(uint64_t size, T const& value): Array(size) {
     for(auto i = 0; i < size; i++) {
       array_[i] = value;
     }
