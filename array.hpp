@@ -102,6 +102,17 @@ public:
    */
   Array(uint64_t size) {
     array_ = new T[size];
+    size_ = size;
+    length_ = size;
+  }
+
+  /**
+   * 	Initializes a new array storing n copies of the given value.
+   */
+  Array(uint64_t size, T value = T{}): Array(size) {
+    for(auto i = 0; i < size; i++) {
+      array_[i] = value;
+    }
   }
 
   Array(Array const& other) {
@@ -136,11 +147,14 @@ public:
   /**
    * Overloads [] to select elements from this array.
    */
-  T& operator [] (int64_t const& index) const {
-    if (index < 0 || index >= length()) {
-      throw std::out_of_range("Index is out of bounds");
-    }
+  T& operator [] (int64_t const& index) {
+    return array_[offset_ + index];
+  }
 
+  /**
+   * Overloads [] to select elements from this array.
+   */
+  const T& operator [] (int64_t const& index) const {
     return array_[offset_ + index];
   }
 
@@ -150,7 +164,7 @@ public:
   Array<T> operator * (uint64_t const & right) const {
     Array<T> temp;
     for (auto i = 0; i < right; i++) {
-      for(auto j = 0; j < this->length(); j++) {
+      for(auto j = 0; j < this->(length_ - offset_); j++) {
         temp.push(this->operator[](j));
       }
     }
@@ -202,12 +216,12 @@ public:
   Array<T> operator + (Array<T> const& right) const {
     Array<T> temp;
 
-    for(auto i = 0; i < this->length(); i++) {
+    for(auto i = 0; i < this->(length_ - offset_); i++) {
       temp.push(this->operator[](i));
     }
     
 
-    for (auto i = 0; i < right.length(); i++) {
+    for (auto i = 0; i < right.(length_ - offset_); i++) {
       temp.push(right.operator[](i));
     }
 
@@ -218,7 +232,7 @@ public:
    * Concantenates two arrays and assigns it to this array.
    */
   Array<T>& operator += (Array<T> const& right) {
-    for (auto i = 0; i < right.length(); i++) {
+    for (auto i = 0; i < right.(length_ - offset_); i++) {
       this->push(right.operator[](i));
     }
 
@@ -229,10 +243,10 @@ public:
    * Repeats the values in this array by n times and assigns it to this array.
    */
   Array<T>& operator *= (uint64_t const& right) const {
-    T * temp = new T[length() * right];
+    T * temp = new T[(length_ - offset_) * right];
     auto index = 0;
     for (auto i = 0; i < right; i++) {
-     for (auto j = 0; j < length(); j++) {
+     for (auto j = 0; j < (length_ - offset_); j++) {
        temp[index] = this->operator[](j);
        index += 1;
      }
@@ -240,7 +254,7 @@ public:
 
     delete [] array_;
     array_ = temp;
-    size_ = (length()) * right;
+    size_ = ((length_ - offset_)) * right;
     length_ = size_;
     offset_ = 0;
 
@@ -264,14 +278,14 @@ public:
     if (size_ == 0) {
       size = std::max((uint64_t) 1, (uint64_t) (size_ * 2));
     } else {
-      size = is_full() ? 2 * size_ : length() + 1;
+      size = is_full() ? 2 * size_ : (length_ - offset_) + 1;
     }
 
     T * array = new T[size];
     
     array[0] = value;
 
-    for(auto i = 1; i <= length(); i++) {
+    for(auto i = 1; i <= (length_ - offset_); i++) {
       array[i] = this->operator[]((i - 1));
     }
 
@@ -307,7 +321,7 @@ public:
       reserve(2 * size_, true);
     }
 
-    array_[length()] = value;
+    array_[(length_ - offset_)] = value;
     length_ += 1;
   }
   
@@ -319,17 +333,39 @@ public:
       throw std::out_of_range("Array is empty");
     }
 
-    T& element = array_[length() - 1];
+    T& element = array_[(length_ - offset_) - 1];
     length_ -= 1;
 
     return element;
   }
 
   /**
+   * Returns the element at the given index with bound checking.
+   */
+  T& at(int64_t index) {
+    if (index < 0 || index >= (length_ - offset_)) {
+      throw std::out_of_range("Index is out of bounds");
+    }
+
+    return this->operator[](index);
+  }
+
+  /**
+   * Sets the value at the given index with bound checking.
+   */
+  void at(int64_t index, T const& value) {
+    if (index < 0 || index >= (length_ - offset_)) {
+      throw std::out_of_range("Index is out of bounds");
+    }
+
+    this->operator[](index) = value;
+  }
+
+  /**
    * Iterates through each value in this array. 
    */
   void for_each(function<void (T)>const& lambda) const {
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       lambda(this->operator[](i));
     }
   }
@@ -338,7 +374,7 @@ public:
    * Iterates through each value in this array. 
    */
   void for_each(function<void (T, int64_t)>const& lambda) const {
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       lambda(this->operator[](i), i);
     }
   }
@@ -348,7 +384,7 @@ public:
    */
   Array<T> filter(function<bool (T)> const& lambda) const {
     Array<T> temp;
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       if (lambda(this->operator[](i))) {
         temp.push(this->operator[](i));
       }
@@ -361,7 +397,7 @@ public:
    */
   Array<T> filter(function<bool (T, int64_t)> const& lambda) const {
     Array<T> temp;
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       if (lambda(this->operator[](i), i)) {
         temp.push(this->operator[](i));
       }
@@ -374,7 +410,7 @@ public:
    */
   Array<T> map(function<T (T)> const& lambda) const {
     Array<T> temp;
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i)));
     }
     return temp;
@@ -385,7 +421,7 @@ public:
    */
   Array<T> map(function<T (T, int64_t)> const& lambda) const {
     Array<T> temp;
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i), i));
     }
     return temp;
@@ -397,7 +433,7 @@ public:
   template <typename U>
   Array<U> map(function<U (T)> const& lambda) const {
     Array<U> temp;
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i)));
     }
     return temp;
@@ -409,7 +445,7 @@ public:
   template <typename U>
   Array<U> map(function<U (T, int64_t)> const& lambda) const {
     Array<U> temp;
-    for(auto i = 0; i < length(); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i), i));
     }
     return temp;
@@ -420,7 +456,7 @@ public:
     */
     T reduce(function<T (T, T)> const & lambda) const {
       T value = this->operator[](0);
-      for(auto i = 1; i < length(); i++) {
+      for(auto i = 1; i < (length_ - offset_); i++) {
         value = lambda(value, this->operator[](i));
       }
       return value;
@@ -431,7 +467,7 @@ public:
      */
     T reduce(function<T (T, T, int64_t)> const & lambda) const {
       T value = this->operator[](0);
-      for(auto i = 1; i < length(); i++) {
+      for(auto i = 1; i < (length_ - offset_); i++) {
         value = lambda(value, this->operator[](i), i);
       }
       return value;
@@ -442,7 +478,7 @@ public:
      */
     T reduce(function<T (T, T)> const & lambda, T initial) const {
       T value = initial;
-      for(auto i = 0; i < length(); i++) {
+      for(auto i = 0; i < (length_ - offset_); i++) {
         value = lambda(value, this->operator[](i));
       }
       return value;
@@ -453,7 +489,7 @@ public:
      */
     T reduce(function<T (T, T, int64_t)> const & lambda, T initial) const {
       T value = initial;
-      for(auto i = 0; i < length(); i++) {
+      for(auto i = 0; i < (length_ - offset_); i++) {
         value = lambda(value, this->operator[](i), i);
       }
       return value;
@@ -466,7 +502,7 @@ public:
     template <typename U>
     U reduce(function<U (U, T)> const & lambda, U initial) const {
       U value = initial;
-      for(auto i = 0; i < length(); i++) {
+      for(auto i = 0; i < (length_ - offset_); i++) {
         value = lambda(value, this->operator[](i));
       }
       return value;
@@ -478,7 +514,7 @@ public:
     template <typename U>
     U reduce(function<U (U, T, int64_t)> const & lambda, U initial) const {
       U value = initial;
-      for(auto i = 0; i < length(); i++) {
+      for(auto i = 0; i < (length_ - offset_); i++) {
         value = lambda(value, this->operator[](i), i);
       }
       return value;
@@ -489,7 +525,7 @@ public:
    */
   Array<T> reverse() const {
     Array<T> temp;
-    for(auto i = length() - 1; i >= 0; i--) {
+    for(auto i = (length_ - offset_) - 1; i >= 0; i--) {
       temp.push(this->operator[](i));
     }
     return temp;
@@ -508,7 +544,7 @@ public:
   string join(const string& seperator) const {
     string result = "";
     this->for_each([&] (T x, auto i) {
-      result += (array_utils::to_string(x) + ((i == length() - 1) ? "" : seperator));
+      result += (array_utils::to_string(x) + ((i == (length_ - offset_) - 1) ? "" : seperator));
     });
     return result;
   }
@@ -549,14 +585,14 @@ public:
    * Determine whether the array is empty.
    */
   bool is_empty() const {
-    return length() == 0;
+    return (length_ - offset_) == 0;
   }
   
   /**
    * Determine whether the array is full.
    */
   bool is_full() const {
-    return length() == size_;
+    return (length_ - offset_) == size_;
   }
 };
 
