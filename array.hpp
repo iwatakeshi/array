@@ -164,7 +164,7 @@ public:
   Array<T> operator * (uint64_t const & right) const {
     Array<T> temp;
     for (auto i = 0; i < right; i++) {
-      for(auto j = 0; j < this->(length_ - offset_); j++) {
+      for(auto j = 0; j < (length_ - offset_); j++) {
         temp.push(this->operator[](j));
       }
     }
@@ -216,12 +216,12 @@ public:
   Array<T> operator + (Array<T> const& right) const {
     Array<T> temp;
 
-    for(auto i = 0; i < this->(length_ - offset_); i++) {
+    for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(this->operator[](i));
     }
     
 
-    for (auto i = 0; i < right.(length_ - offset_); i++) {
+    for (auto i = 0; i < (right.length_ - right.offset_); i++) {
       temp.push(right.operator[](i));
     }
 
@@ -232,7 +232,7 @@ public:
    * Concantenates two arrays and assigns it to this array.
    */
   Array<T>& operator += (Array<T> const& right) {
-    for (auto i = 0; i < right.(length_ - offset_); i++) {
+    for (auto i = 0; i < (right.length_ - right.offset_); i++) {
       this->push(right.operator[](i));
     }
 
