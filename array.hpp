@@ -524,9 +524,39 @@ public:
    * Reverses the values in this array and returns a new array.
    */
   Array<T> reverse() const {
-    Array<T> temp;
+    Array<T> temp(length_ - offset_);
+    auto index = 0;
     for(auto i = (length_ - offset_) - 1; i >= 0; i--) {
-      temp.push(this->operator[](i));
+      temp[index] = this->operator[](i);
+      index += 1;
+    }
+    return temp;
+  }
+
+  /**
+   * Returns a new array with the values from the specified index.
+   */
+  Array<T> slice(int64_t index) const {
+    return slice(index, (length_ - offset_));
+  }
+
+  /**
+   * Returns a new array with the values from the specified range.
+   */
+  Array<T> slice(int64_t begin, int64_t end) const {
+    int64_t len = length_ - offset_;
+    begin = (begin >= 0) ? begin : std::max(int64_t(0), len + begin);
+    end = (end <= len) ? end : std::min(end, len);
+
+    if (end < 0) {
+      end = len + end;
+    }
+
+    auto size = end - begin;
+
+    Array<T> temp(size);
+    for (auto i = 0; i < size; i++) {
+      temp[i] = this->operator[](begin + i);
     }
     return temp;
   } 
