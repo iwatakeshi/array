@@ -59,5 +59,10 @@ int main() {
 
   cout << d << endl;
 
+
+  cout << d.slice(1, 3) << endl;
+  
+  cout << d.slice(-1) << endl;
+
   return 0;
 }
