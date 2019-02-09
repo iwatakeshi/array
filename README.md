@@ -105,7 +105,6 @@ int main() {
   cout << "e: " << e << endl;
 
   // Get a sub list using a negative index
-
   auto f = d.slice(-1);
 
   cout << "f: " << f << endl;
