@@ -5,7 +5,7 @@ using std::cout;
 using std::endl;
 
 int main() {
-  Array<int> a;
+  array<int> a;
   a.push(1);
   a.push(2);
 
@@ -15,7 +15,7 @@ int main() {
     cout << "a: " << i << " - " << x << endl;
   });
 
-  Array<int> b;
+  array<int> b;
 
   b.push(12);
   b.push(3);
@@ -53,7 +53,7 @@ int main() {
     return value * 2;
   }) << endl;
 
-  Array<int> d;
+  array<int> d;
 
   d = { 1, 2, 3, 4 };
 

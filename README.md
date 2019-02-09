@@ -1,4 +1,4 @@
-# `Array<T>`
+# `array<T>`
 A JavaScript + Python like array in C++.
 
 
@@ -6,10 +6,10 @@ A JavaScript + Python like array in C++.
 
 | Constructor  | Performance  | Description  |
 |---|---|---|
-| `Array()`         | *O(1)* | Initializes a new empty array.  |
-| `Array(n)`        | *O(1)* | Initializes a new array of size `n`.  |
-| `Array(n, value)` | *O(n)* | Initializes a new array of size `n` with the given value.  |
-| `Array(list)`     | *O(n)* | Initializes a new array with list initialization. |
+| `array()`         | *O(1)* | Initializes a new empty array.  |
+| `array(n)`        | *O(1)* | Initializes a new array of size `n`.  |
+| `array(n, value)` | *O(n)* | Initializes a new array of size `n` with the given value.  |
+| `array(list)`     | *O(n)* | Initializes a new array with list initialization. |
 
 | Method  |  Performance  |  Description  |
 |---|---|---|
@@ -20,15 +20,15 @@ A JavaScript + Python like array in C++.
 | `at(index): T`                                                  | *O(1)* | Returns the element at the given index with bound checking. |
 | `at(index, value): T`                                           | *O(1)* | Sets the value at the given index with bound checking. |
 | `for_each((value, index?) -> void): void`                       | *O(n)* | Iterates through each value in this array. |
-| `filter((value, index?) -> bool): Array<T>`                     | *O(n)* | Filters this array and returns a new array based on a condition. |
-| `map((value, index?) -> T): Array<T>`                           | *O(n)* | Maps each value in this array and returns a new array of type `T`. |
-| `map<U>((value, index?) -> T): Array<U>`                        | *O(n)* | Maps each value in this array and returns a new array of type `U`. |
+| `filter((value, index?) -> bool): array<T>`                     | *O(n)* | Filters this array and returns a new array based on a condition. |
+| `map((value, index?) -> T): array<T>`                           | *O(n)* | Maps each value in this array and returns a new array of type `T`. |
+| `map<U>((value, index?) -> T): array<U>`                        | *O(n)* | Maps each value in this array and returns a new array of type `U`. |
 | `reduce((accumulator, current, index?) -> T): T`                | *O(n)* | Reduces the values in this array into a single output value of type `T`. |
 | `reduce((accumulator, current, index?) -> T, initial): T`       | *O(n)* | Reduces the values in this array into a single output value of type `T`. |
 | `reduce<U>((accumulator, current, index?) -> U, initital): U`   | *O(n)* | Reduces the values in this array into a single output value of type `U`. |
-| `reverse(): Array<T>`                                           | *O(n)* | Reverses the values in this array and returns a new array. |
-| `slice(index): Array<T>`                                        | *O(n)* | Returns a new array with the values from the specified index. |
-| `slice(begin, end): Array<T>`                                   | *O(n)* | Returns a new array with the values from the specified range. |
+| `reverse(): array<T>`                                           | *O(n)* | Reverses the values in this array and returns a new array. |
+| `slice(index): array<T>`                                        | *O(n)* | Returns a new array with the values from the specified index. |
+| `slice(begin, end): array<T>`                                   | *O(n)* | Returns a new array with the values from the specified range. |
 | `join(): string`                                                | *O(n)* | Returns a string of this array using `,` as the default seperator. |
 | `join(seperator): string`                                       | *O(n)* | Returns a string of this array using a provided seperator. |
 | `length(): int`                                                 | *O(1)* | Returns the number of elements in this array. |
@@ -54,7 +54,7 @@ using std::cout;
 using std::endl;
 
 int main() {
-  Array<int> a;
+  array<int> a;
   
   // Insert elements at the end
   a.push(1);
@@ -69,7 +69,7 @@ int main() {
   });
 
 
-  Array<int> b;
+  array<int> b;
 
   b.push(12);
   b.push(3);
@@ -97,7 +97,7 @@ int main() {
   cout << "a: " << a << endl;
 
   // Initialize with list initialization
-  Array<int> d = { 1, 2, 3, 4 };
+  array<int> d = { 1, 2, 3, 4 };
 
   // Get a sub list within the range
   auto e = d.slice(1, 3)

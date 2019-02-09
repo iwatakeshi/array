@@ -77,7 +77,7 @@ namespace array_utils {
 }
 
 template <class T>
-class Array {
+class array {
 private:
   // The pointer array
   T * array_ = nullptr;
@@ -95,12 +95,12 @@ public:
  /**
   * 	Initializes a new empty array.
   */
-  Array() {}
+  array() {}
 
   /**
    * 	Initializes a new array storing n copies of zeroes.
    */
-  Array(uint64_t size) {
+  array(uint64_t size) {
     array_ = new T[size];
     size_ = size;
     length_ = size;
@@ -109,13 +109,13 @@ public:
   /**
    * 	Initializes a new array storing n copies of the given value.
    */
-  Array(uint64_t size, T const& value): Array(size) {
+  array(uint64_t size, T const& value): Array(size) {
     for(auto i = 0; i < size; i++) {
       array_[i] = value;
     }
   }
 
-  Array(Array const& other) {
+  array(array const& other) {
     reserve(other.size_, false);
     for(auto i = 0; i < other.size_; i++) {
       array_[i] = other.array_[i];
@@ -129,7 +129,7 @@ public:
   /**
    * 	Initializes a new array with list initialization.
    */
-  Array(std::initializer_list<T> const& list) {
+  array(std::initializer_list<T> const& list) {
     reserve(list.size(), false);
 
     for(auto element : list) {
@@ -137,7 +137,7 @@ public:
     }
   }
 
-  ~Array() {
+  ~array() {
     delete [] array_;
     offset_ = 0;
     size_ = 0;
@@ -161,8 +161,8 @@ public:
   /**
    * Repeats the values in this array by n times.
    */
-  Array<T> operator * (uint64_t const & right) const {
-    Array<T> temp;
+  array<T> operator * (uint64_t const & right) const {
+    array<T> temp;
     for (auto i = 0; i < right; i++) {
       for(auto j = 0; j < (length_ - offset_); j++) {
         temp.push(this->operator[](j));
@@ -175,7 +175,7 @@ public:
   /**
    * Assigns this array with the array on the right hand side.
    */
-  Array<T>& operator = (Array<T> const& right) {
+  array<T>& operator = (array<T> const& right) {
     if (size_ < right.size_) {
       reserve(right.size_, false);
     }
@@ -194,7 +194,7 @@ public:
   /**
    * Assigns this array with the array on the right hand side.
    */
-  Array<T>& operator = (std::initializer_list<T> const& list) {
+  array<T>& operator = (std::initializer_list<T> const& list) {
     T * temp = new T[list.size()];
     auto index = 0;
     for(auto element : list) {
@@ -213,8 +213,8 @@ public:
   /**
    * Concantenates two arrays.
    */
-  Array<T> operator + (Array<T> const& right) const {
-    Array<T> temp;
+  array<T> operator + (array<T> const& right) const {
+    array<T> temp;
 
     for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(this->operator[](i));
@@ -231,7 +231,7 @@ public:
   /**
    * Concantenates two arrays and assigns it to this array.
    */
-  Array<T>& operator += (Array<T> const& right) {
+  array<T>& operator += (array<T> const& right) {
     for (auto i = 0; i < (right.length_ - right.offset_); i++) {
       this->push(right.operator[](i));
     }
@@ -242,7 +242,7 @@ public:
   /**
    * Repeats the values in this array by n times and assigns it to this array.
    */
-  Array<T>& operator *= (uint64_t const& right) const {
+  array<T>& operator *= (uint64_t const& right) const {
     T * temp = new T[(length_ - offset_) * right];
     auto index = 0;
     for (auto i = 0; i < right; i++) {
@@ -264,7 +264,7 @@ public:
   /**
    * Outputs the contents of the array to the given output stream.
    */
-  friend ostream& operator << (ostream& os, const Array<T>& array) {
+  friend ostream& operator << (ostream& os, const array<T>& array) {
     os  << "[ " << array.join(", ") << " ]";
     return os;
   }
@@ -382,8 +382,8 @@ public:
   /**
    * Filters this array and returns a new array based on a condition.
    */
-  Array<T> filter(function<bool (T)> const& lambda) const {
-    Array<T> temp;
+  array<T> filter(function<bool (T)> const& lambda) const {
+    array<T> temp;
     for(auto i = 0; i < (length_ - offset_); i++) {
       if (lambda(this->operator[](i))) {
         temp.push(this->operator[](i));
@@ -395,8 +395,8 @@ public:
   /**
    * Filters this array and returns a new array based on a condition.
    */
-  Array<T> filter(function<bool (T, int64_t)> const& lambda) const {
-    Array<T> temp;
+  array<T> filter(function<bool (T, int64_t)> const& lambda) const {
+    array<T> temp;
     for(auto i = 0; i < (length_ - offset_); i++) {
       if (lambda(this->operator[](i), i)) {
         temp.push(this->operator[](i));
@@ -408,8 +408,8 @@ public:
   /**
    *Maps each value in this array and returns a new array of type T.
    */
-  Array<T> map(function<T (T)> const& lambda) const {
-    Array<T> temp;
+  array<T> map(function<T (T)> const& lambda) const {
+    array<T> temp;
     for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i)));
     }
@@ -419,8 +419,8 @@ public:
   /**
    * Maps each value in this array and returns a new array of type T.
    */
-  Array<T> map(function<T (T, int64_t)> const& lambda) const {
-    Array<T> temp;
+  array<T> map(function<T (T, int64_t)> const& lambda) const {
+    array<T> temp;
     for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i), i));
     }
@@ -523,8 +523,8 @@ public:
   /**
    * Reverses the values in this array and returns a new array.
    */
-  Array<T> reverse() const {
-    Array<T> temp(length_ - offset_);
+  array<T> reverse() const {
+    array<T> temp(length_ - offset_);
     auto index = 0;
     for(auto i = (length_ - offset_) - 1; i >= 0; i--) {
       temp[index] = this->operator[](i);
@@ -536,14 +536,14 @@ public:
   /**
    * Returns a new array with the values from the specified index.
    */
-  Array<T> slice(int64_t index) const {
+  array<T> slice(int64_t index) const {
     return slice(index, (length_ - offset_));
   }
 
   /**
    * Returns a new array with the values from the specified range.
    */
-  Array<T> slice(int64_t begin, int64_t end) const {
+  array<T> slice(int64_t begin, int64_t end) const {
     int64_t len = length_ - offset_;
     begin = (begin >= 0) ? begin : std::max(int64_t(0), len + begin);
     end = (end <= len) ? end : std::min(end, len);
@@ -554,7 +554,7 @@ public:
 
     auto size = end - begin;
 
-    Array<T> temp(size);
+    array<T> temp(size);
     for (auto i = 0; i < size; i++) {
       temp[i] = this->operator[](begin + i);
     }
