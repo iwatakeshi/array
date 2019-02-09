@@ -4,15 +4,11 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <type_traits>
-#include <typeinfo>
 #include <stdexcept>
-#include <algorithm>
 
 using std::function;
 using std::ostream;
 using std::string;
-using std::is_fundamental;
 
 namespace array_utils {
   /**
@@ -109,7 +105,7 @@ public:
   /**
    * 	Initializes a new array storing n copies of the given value.
    */
-  array(uint64_t size, T const& value): Array(size) {
+  array(uint64_t size, T const& value): array(size) {
     for(auto i = 0; i < size; i++) {
       array_[i] = value;
     }
@@ -431,8 +427,8 @@ public:
    * Maps each value in this array and returns a new array of type U.
    */
   template <typename U>
-  Array<U> map(function<U (T)> const& lambda) const {
-    Array<U> temp;
+  array<U> map(function<U (T)> const& lambda) const {
+    array<U> temp;
     for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i)));
     }
@@ -443,8 +439,8 @@ public:
    *Maps each value in this array and returns a new array of type U.
    */
   template <typename U>
-  Array<U> map(function<U (T, int64_t)> const& lambda) const {
-    Array<U> temp;
+  array<U> map(function<U (T, int64_t)> const& lambda) const {
+    array<U> temp;
     for(auto i = 0; i < (length_ - offset_); i++) {
       temp.push(lambda(this->operator[](i), i));
     }
