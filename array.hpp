@@ -175,7 +175,7 @@ public:
   /**
    * Assigns this array with the array on the right hand side.
    */
-  Array<T>& operator = (Array<T> const& right) const {
+  Array<T>& operator = (Array<T> const& right) {
     if (size_ < right.size_) {
       reserve(right.size_, false);
     }
