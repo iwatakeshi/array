@@ -27,6 +27,8 @@ A JavaScript + Python like array in C++.
 | `reduce((accumulator, current, index?) -> T, initial): T`       | *O(n)* | Reduces the values in this array into a single output value of type `T`. |
 | `reduce<U>((accumulator, current, index?) -> U, initital): U`   | *O(n)* | Reduces the values in this array into a single output value of type `U`. |
 | `reverse(): Array<T>`                                           | *O(n)* | Reverses the values in this array and returns a new array. |
+| `slice(index): Array<T>`                                        | *O(n)* | Returns a new array with the values from the specified index. |
+| `slice(begin, end): Array<T>`                                   | *O(n)* | Returns a new array with the values from the specified range. |
 | `join(): string`                                                | *O(n)* | Returns a string of this array using `,` as the default seperator. |
 | `join(seperator): string`                                       | *O(n)* | Returns a string of this array using a provided seperator. |
 | `length(): int`                                                 | *O(1)* | Returns the number of elements in this array. |
@@ -93,6 +95,21 @@ int main() {
   a.unshift(100);
 
   cout << "a: " << a << endl;
+
+  // Initialize with list initialization
+  Array<int> d = { 1, 2, 3, 4 };
+
+  // Get a sub list within the range
+  auto e = d.slice(1, 3)
+  
+  cout << "e: " << e << endl;
+
+  // Get a sub list using a negative index
+
+  auto f = d.slice(-1);
+
+  cout << "f: " << f << endl;
+
   return 0;
 }
 ```
