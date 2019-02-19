@@ -647,14 +647,14 @@ public:
   }
 
   /**
-   * Returns an iterator pointing to the first element in the vector.
+   * Returns an iterator pointing to the first element in the array.
    */
   iterator begin() {
     return iterator(array_ + offset_);
   }
 
   /**
-   * Returns an iterator referring to the past-the-end element in the vector container.
+   * Returns an iterator referring to the past-the-end element in the array container.
    */
   iterator end() {
     return iterator(array_ + (length_ - offset_));
