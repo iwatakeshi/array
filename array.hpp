@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <stdexcept>
+#include <iterator>
 
 using std::function;
 using std::ostream;
@@ -88,6 +89,30 @@ private:
   uint64_t length_ = 0;
 
 public:
+
+  class iterator {
+    /**
+     * Credits
+     * https://gist.github.com/jeetsukumaran/307264
+     */
+    public:
+      typedef iterator self_type;
+      typedef T value_type;
+      typedef T& reference;
+      typedef T* pointer;
+      typedef std::forward_iterator_tag iterator_category;
+      typedef int difference_type;
+      iterator(pointer ptr) : ptr_(ptr) { }
+      self_type operator++() { self_type i = *this; ptr_++; return i; }
+      self_type operator++(int) { ptr_++; return *this; }
+      reference operator*() { return *ptr_; }
+      pointer operator->() { return ptr_; }
+      bool operator==(const self_type& right) { return ptr_ == right.ptr_; }
+      bool operator!=(const self_type& right) { return ptr_ != right.ptr_; }
+    private:
+      pointer ptr_;
+  };
+
  /**
   * 	Initializes a new empty array.
   */
@@ -620,7 +645,20 @@ public:
   bool is_full() const {
     return (length_ - offset_) == size_;
   }
-};
 
+  /**
+   * Returns an iterator pointing to the first element in the vector.
+   */
+  iterator begin() {
+    return iterator(array_ + offset_);
+  }
+
+  /**
+   * Returns an iterator referring to the past-the-end element in the vector container.
+   */
+  iterator end() {
+    return iterator(array_ + (length_ - offset_));
+  }
+};
 
 #endif
