@@ -33,6 +33,8 @@ A JavaScript + Python like array in C++.
 | `join(seperator): string`                                       | *O(n)* | Returns a string of this array using a provided seperator. |
 | `length(): int`                                                 | *O(1)* | Returns the number of elements in this array. |
 | `is_empty(): int`                                               | *O(1)* | Returns **true** if this array is empty. |
+| `begin(): iterator`                                             | *O(1)* | Returns an iterator pointing to the first element in the array. |
+| `end(): iterator`                                               | *O(1)* | Returns an iterator referring to the past-the-end element in the array container. |
 
 |  Operator  |  Performance  |  Description  |
 |---|---|---|
@@ -108,6 +110,11 @@ int main() {
   auto f = d.slice(-1);
 
   cout << "f: " << f << endl;
+
+  // Use a for-range loop to iterate through the array
+  for (auto& n in f) {
+    cout << f << endl;
+  }
 
   return 0;
 }
