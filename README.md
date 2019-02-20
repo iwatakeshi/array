@@ -1,6 +1,15 @@
 # `array<T>`
 A JavaScript + Python like array in C++.
 
+## Usage
+
+To use this library, install [buckaroo](https://github.com/LoopPerfect/buckaroo/wiki/Installation#buckaroo) and [buck](https://github.com/LoopPerfect/buckaroo/wiki/Installation#buck). Once installed, [initialize](https://github.com/LoopPerfect/buckaroo/wiki/Commands#init) buckaroo in your project folder and run the following command:
+
+```bash
+# Add the latest version
+buckaroo add github.com/iwatakeshi/array/
+```
+You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/wiki/Version-Constraints-DSL) if you need to.
 
 ## API
 
