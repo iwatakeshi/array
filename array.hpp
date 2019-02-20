@@ -118,8 +118,8 @@ public:
 
       inline iterator& operator++() { ++ptr_; return *this; }
       inline iterator& operator--() { --ptr_; return *this; }
-      inline iterator operator++(int) const { iterator tmp(*this); ++ptr_; return tmp; }
-      inline iterator operator--(int) const { iterator tmp(*this); --ptr_; return tmp; }
+      inline iterator operator++(int) { iterator tmp(*this); ++ptr_; return tmp; }
+      inline iterator operator--(int) { iterator tmp(*this); --ptr_; return tmp; }
       inline difference_type operator+(const iterator& right) { return ptr_ + right.ptr; }
       inline difference_type operator-(const iterator& right) const { return ptr_ - right.ptr_; }
       inline iterator operator+(difference_type right) const { return iterator(ptr_ + right); }
