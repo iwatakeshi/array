@@ -33,7 +33,6 @@
 
 # Buckaroo
 .buckd
-.buckconfig
 .buckconfig.d
 .buckconfig.local
 buck-out
