@@ -12,3 +12,13 @@ prebuilt_cxx_library(
     'PUBLIC',
   ],
 )
+
+cxx_binary(
+  name = 'main',
+  srcs = [
+    'main.cpp',
+  ],
+  deps = [
+    ':array',
+  ],
+)
