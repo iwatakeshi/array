@@ -638,13 +638,15 @@ public:
     T * array = new T[size];
 
     if (copy) {
-      for(auto i = 0; i < size_; i++) {
+      for(auto i = offset_; i < size_; i++) {
         array[i] = this->operator[](i);
       }
     }
 
     delete [] array_;
 
+    length_ = length_ - offset_;
+    offset_ = 0;
     size_ = size;
     array_ = array;
   }
