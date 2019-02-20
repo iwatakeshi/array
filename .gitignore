@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Buckaroo
+.buckd
+.buckconfig
+.buckconfig.d
+.buckconfig.local
+buck-out
+buckaroo
+buckaroo_macros.bzl
+
