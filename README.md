@@ -41,6 +41,7 @@ You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/
 | `join(): string`                                                | *O(n)* | Returns a string of this array using `,` as the default seperator. |
 | `join(seperator): string`                                       | *O(n)* | Returns a string of this array using a provided seperator. |
 | `length(): int`                                                 | *O(1)* | Returns the number of elements in this array. |
+| `capacity(): int`                                               | *O(1)* | Returns the capacity of the array. |
 | `is_empty(): int`                                               | *O(1)* | Returns **true** if this array is empty. |
 | `begin(): iterator`                                             | *O(1)* | Returns an iterator pointing to the first element in the array. |
 | `end(): iterator`                                               | *O(1)* | Returns an iterator referring to the past-the-end element in the array container. |
