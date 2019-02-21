@@ -83,8 +83,8 @@ private:
   // This allows the array to have a O(1) when
   // removing an element from the front.
   uint64_t offset_ = 0;
-  // The heap size.
-  uint64_t size_ = 0;
+  // The heap capacity.
+  uint64_t capacity_ = 0;
   // The number of elements in the array.
   uint64_t length_ = 0;
 
@@ -145,29 +145,28 @@ public:
   /**
    * 	Initializes a new array storing n copies of zeroes.
    */
-  array(uint64_t size) {
-    array_ = new T[size];
-    size_ = size;
-    length_ = size;
+  array(uint64_t capacity) {
+    reserve(capacity);
+    length_ = capacity;
   }
 
   /**
    * 	Initializes a new array storing n copies of the given value.
    */
-  array(uint64_t size, T const& value): array(size) {
-    for(auto i = 0; i < size; i++) {
+  array(uint64_t capacity, T const& value): array(capacity) {
+    for(auto i = 0; i < capacity; i++) {
       array_[i] = value;
     }
   }
 
   array(array const& other) {
-    reserve(other.size_, false);
-    for(auto i = 0; i < other.size_; i++) {
+    reserve(other.capacity_, false);
+    for(auto i = 0; i < other.capacity_; i++) {
       array_[i] = other.array_[i];
     }
 
     offset_ = other.offset_;
-    size_ = other.size_;
+    capacity_ = other.capacity_;
     length_ = other.length_;
   }
 
@@ -185,7 +184,7 @@ public:
   ~array() {
     delete [] array_;
     offset_ = 0;
-    size_ = 0;
+    capacity_ = 0;
     length_ = 0;
   }
 
@@ -221,15 +220,15 @@ public:
    * Assigns this array with the array on the right hand side.
    */
   array<T>& operator = (array<T> const& right) {
-    if (size_ < right.size_) {
-      reserve(right.size_, false);
+    if (capacity_ < right.capacity_) {
+      reserve(right.capacity_, false);
     }
 
-    size_ = right.size_;
+    capacity_ = right.capacity_;
     offset_ = right.offset_;
     length_ = right.length_ + right.offset_;
 
-    for (auto i = 0; i < size_; i++) {
+    for (auto i = 0; i < capacity_; i++) {
       array_[i] = right.array_[i];
     }
 
@@ -248,8 +247,8 @@ public:
     
     delete [] array_;
     array_ = temp;
-    size_ = list.size();
-    length_ = size_;
+    capacity_ = list.size();
+    length_ = capacity_;
     offset_ = 0;
 
     return *this;
@@ -299,8 +298,8 @@ public:
 
     delete [] array_;
     array_ = temp;
-    size_ = ((length_ - offset_)) * right;
-    length_ = size_;
+    capacity_ = ((length_ - offset_)) * right;
+    length_ = capacity_;
     offset_ = 0;
 
     return *this;
@@ -319,14 +318,14 @@ public:
    */
   void unshift(T const& value) {
     // Determine if the array is full
-    auto size = 0;
-    if (size_ == 0) {
-      size = std::max((uint64_t) 1, (uint64_t) (size_ * 2));
+    auto capacity = 0;
+    if (capacity_ == 0) {
+      capacity = std::max((uint64_t) 1, (uint64_t) (capacity_ * 2));
     } else {
-      size = is_full() ? 2 * size_ : (length_ - offset_) + 1;
+      capacity = is_full() ? 2 * capacity_ : (length_ - offset_) + 1;
     }
 
-    T * array = new T[size];
+    T * array = new T[capacity];
     
     array[0] = value;
 
@@ -338,7 +337,7 @@ public:
     array_ = array;
 
     length_ += 1;
-    size_ = size;
+    capacity_ = capacity;
   }
   
   /**
@@ -360,10 +359,10 @@ public:
    */
   void push(T const& value) {
     // Determine if the array is full
-    if (size_ == 0) {
-      reserve(std::max((uint64_t) 1, (uint64_t) size_ * 2), false);
+    if (capacity_ == 0) {
+      reserve(std::max((uint64_t) 1, (uint64_t) capacity_ * 2), false);
     } else if (is_full()) {
-      reserve(2 * size_, true);
+      reserve(2 * capacity_, true);
     }
 
     array_[(length_ - offset_)] = value;
@@ -597,10 +596,10 @@ public:
       end = len + end;
     }
 
-    auto size = end - begin;
+    auto capacity = end - begin;
 
-    array<T> temp(size);
-    for (auto i = 0; i < size; i++) {
+    array<T> temp(capacity);
+    for (auto i = 0; i < capacity; i++) {
       temp[i] = this->operator[](begin + i);
     }
     return temp;
@@ -627,18 +626,18 @@ public:
   /**
    * Allocates space on the heap.
    */
-  void reserve(uint64_t size) {
-    reserve(size, false);
+  void reserve(uint64_t capacity) {
+    reserve(capacity, false);
   }
   
   /**
    * Allocates space on the heap.
    */
-  void reserve(uint64_t size, bool copy) {
-    T * array = new T[size];
+  void reserve(uint64_t capacity, bool copy) {
+    T * array = new T[capacity];
 
     if (copy) {
-      for(auto i = offset_; i < size_; i++) {
+      for(auto i = offset_; i < capacity_; i++) {
         array[i] = this->operator[](i);
       }
     }
@@ -647,7 +646,7 @@ public:
 
     length_ = length_ - offset_;
     offset_ = 0;
-    size_ = size;
+    capacity_ = capacity;
     array_ = array;
   }
   
@@ -656,6 +655,13 @@ public:
    */
   int64_t length() const {
     return length_ - offset_;
+  }
+
+  /**
+   * Returns the heap capacity of the array.
+   */
+  int64_t capacity() const {
+    return capacity_;
   }
   
   /**
@@ -669,7 +675,7 @@ public:
    * Determine whether the array is full.
    */
   bool is_full() const {
-    return (length_ - offset_) == size_;
+    return (length_ - offset_) == capacity_;
   }
 
   /**
