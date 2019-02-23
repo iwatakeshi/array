@@ -5,6 +5,19 @@
 
 using namespace mocha;
 
+namespace mocha::helpers {
+  // Extend the helpers for comparisons
+  template <typename T>
+  bool strict_equal(array<T> a, array<T> b) {
+    return a == b;
+  }
+
+  template <typename T>
+  bool equal(array<T> a, array<T> b) {
+    return a == b;
+  }
+}
+
 int main() {
   describe("constructor", [&] {
     describe("array()", [&] {
@@ -93,10 +106,15 @@ int main() {
     describe("pop", [&] {
       array<int> a = { 1, 2, 3 };
       it("should remove the value from the beginning of the array and return it.", [&] {
-        return expect(a.pop()).to->equal(3)->result() +
-               expect(a.pop()).to->equal(2)->result() +
-               expect(a.pop()).to->equal(1)->result() +
-               expect(a.length()).to->equal(0)->result();
+        result_t result;
+        int count = 3;
+        while (count > 0) {
+          result += expect(a.pop()).to->equal(count--)->result();
+        }
+
+        result += expect(a.length()).to->equal(count)->result();
+
+        return result;
       });
     });
 
@@ -121,14 +139,43 @@ int main() {
     });
 
     describe("for_each((value, index?) -> void)", [&] {
-      array<int> a = { 1, 2, 3 };
-      std::vector<int> b = { 1, 2, 3 };
-      std::vector<test_result> results(b.size());
-      test_result result;
-      a.for_each([&] (auto value, int index) {
-        results.push_back(expect(value).to->equal(b[index])->result());
+      it("should iterate through each value in the array.", [&] {
+        array<int> a = { 1, 2, 3 };
+        std::vector<int> b = { 1, 2, 3 };
+        result_t result;
+        a.for_each([&] (auto value, int index) {
+          result += expect(value).to->equal(b[index])->result();
+        });
+        
+        return result;
       });
+    });
 
+    describe("filter((value, index?) -> bool): array<T>", [&] {
+      it("should filter the array and return a new array based on a condition.", [&] {
+        array<int> a = { 1, 2, 3 };
+        array<int> expected = { 1, 3 };
+        return expect(a.filter([&] (int value) { return value != 2; }))
+        .to->equal(expected)->result();
+      });
+    });
+
+    describe("map((value, index?) -> T): array<T>", [&] {
+      it ("should map each value in the array and return a new array of type T", [&] {
+        array<int> a = { 1, 2, 3 };
+        array<int> expected = { 2, 4, 6 };
+        return expect(a.map([&](int value) { return value * 2; }))
+        .to->equal(expected)->result();
+      });
+    });
+
+    describe("map<U>((value, index?) -> T): array<U>", [&] {
+      it ("should map each value in the array and return a new array of type T", [&] {
+        array<int> a = { 1, 2, 3 };
+        array<double> expected = { 2.0, 4.0, 6.0 };
+        return expect(a.map([&](int value) { return value * 2; }))
+        .to->equal(expected)->result();
+      });
     });
 
   });
