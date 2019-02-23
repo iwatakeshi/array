@@ -245,6 +245,52 @@ public:
   }
 
   /**
+   * Compares the equality of each value within two arrays of type T.
+   */
+  bool operator == (array<T> const& right) {
+    if ((length_ - offset_) == (right.length_ - right.offset_)) {
+      for(auto i = 0; i < (length_ - offset_); i++) {
+        if (this->operator[](i) != right[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Compares the equality of each value within two arrays of type T and U.
+   */
+  template <typename U>
+  friend bool operator == (array<T> const& left, array<U> const& right) {
+    if (left.length() == right.length()) {
+      for(auto i = 0; i < right.length(); i++) {
+        if (left[i] != right[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Compares the in-equality of each value within two arrays of type T.
+   */
+  bool operator != (array<T> const& right) {
+    return !(this->operator==(right));
+  }
+
+  /**
+   * Compares the equality of each value within two arrays of type T and U.
+   */
+  template <typename U>
+  friend bool operator != (array<T> const& left, array<U> const& right) {
+    return !(left == right);
+  }
+
+  /**
    * Outputs the contents of the array to the given output stream.
    */
   friend ostream& operator << (ostream& os, const array<T>& array) {
