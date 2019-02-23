@@ -1,0 +1,17 @@
+manifest = "31f5f5dbc5435f2c4ebe96be3b8f76224fde5108fc3dc1b7d88bdfd4a45f3976"
+
+[[dependency]]
+package = "github.com/iwatakeshi/mocha"
+target = "//:mocha"
+
+[[dependency]]
+package = "github.com/iwatakeshi/to_string"
+target = "//:to_string"
+
+[lock."github.com/iwatakeshi/mocha"]
+versions = [ "branch=master" ]
+revision = "ea96d73bb1ec63fe2fabacc6439574bccb83db7f"
+
+[lock."github.com/iwatakeshi/to_string"]
+versions = [ "tag=1.0.0-alpha" ]
+revision = "c22655357fbe44841c79acf12fd7f60d6d317952"

@@ -1,1 +1,10 @@
-targets = ["//:array"]
+targets = [ "//:array" ]
+
+[[dependency]]
+package = "github.com/iwatakeshi/mocha"
+version = "*"
+
+[[dependency]]
+package = "github.com/iwatakeshi/to_string"
+version = "*"
+

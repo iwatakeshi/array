@@ -1,3 +1,5 @@
+load('//:buckaroo_macros.bzl', 'buckaroo_deps')
+
 prebuilt_cxx_library(
   name = 'array',
   header_only = True,
@@ -13,12 +15,12 @@ prebuilt_cxx_library(
   ],
 )
 
-cxx_binary(
-  name = 'main',
+cxx_test(
+  name = 'test',
   srcs = [
-    'main.cpp',
+    'test/main.cpp'
   ],
   deps = [
-    ':array',
-  ],
+    '//:array',
+  ] + buckaroo_deps()
 )
