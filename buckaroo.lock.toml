@@ -10,7 +10,7 @@ target = "//:to_string"
 
 [lock."github.com/iwatakeshi/mocha"]
 versions = [ "branch=master" ]
-revision = "ea96d73bb1ec63fe2fabacc6439574bccb83db7f"
+revision = "c974bb07cf3a04a310470e4413b492866c88d398"
 
 [lock."github.com/iwatakeshi/to_string"]
 versions = [ "tag=1.0.0-alpha" ]
