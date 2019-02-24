@@ -2,21 +2,9 @@
 #include <mocha.hpp>
 #include <ostream>
 #include <string>
+#include <sstream>
 
 using namespace mocha;
-
-namespace mocha::helpers {
-  // Extend the helpers for comparisons
-  template <typename T>
-  bool strict_equal(array<T> a, array<T> b) {
-    return a == b;
-  }
-
-  template <typename T>
-  bool equal(array<T> a, array<T> b) {
-    return a == b;
-  }
-}
 
 int main() {
   describe("constructor", [&] {
@@ -94,7 +82,7 @@ int main() {
       });
     });
 
-    describe("push(value)", [&] {
+    describe("push(value): T", [&] {
       array<int> a;
       it("should remove the value from the beginning of the array and return it.", [&] {
         a.push(10);
@@ -103,7 +91,7 @@ int main() {
       });
     });
 
-    describe("pop", [&] {
+    describe("pop()", [&] {
       array<int> a = { 1, 2, 3 };
       it("should remove the value from the beginning of the array and return it.", [&] {
         result_t result;
@@ -118,7 +106,7 @@ int main() {
       });
     });
 
-    describe("at(value)", [&] {
+    describe("at(value): T", [&] {
       array<int> a = { 1, 2, 3 };
       it("should return the element at the given index with bound checking.", [&] {
         return expect(a.at(2)).to->equal(3)->result() +
@@ -161,7 +149,7 @@ int main() {
     });
 
     describe("map((value, index?) -> T): array<T>", [&] {
-      it ("should map each value in the array and return a new array of type T", [&] {
+      it ("should map each value in the array and return a new array of type T.", [&] {
         array<int> a = { 1, 2, 3 };
         array<int> expected = { 2, 4, 6 };
         return expect(a.map([&](int value) { return value * 2; }))
@@ -170,11 +158,183 @@ int main() {
     });
 
     describe("map<U>((value, index?) -> T): array<U>", [&] {
-      it ("should map each value in the array and return a new array of type T", [&] {
+      it ("should map each value in the array and return a new array of type T.", [&] {
         array<int> a = { 1, 2, 3 };
         array<double> expected = { 2.0, 4.0, 6.0 };
         return expect(a.map([&](int value) { return value * 2; }))
-        .to->equal(expected)->result();
+        .to->equal<array<double>>(expected, [&] (auto a, auto b) {
+          return a == b;
+        })->result();
+      });
+    });
+
+    describe("reduce((accumulator, current, index?) -> T): T", [&] {
+      it ("should reduce the values in the array into a single output value of type T.", [&] {
+        array<int> a = { 1, 2, 3 };
+        return expect(a.reduce([&](auto acc, auto cur) {
+          return acc + cur;
+        })).to->equal(6)->result();
+      });
+    });
+
+    describe("reduce<U>((accumulator, current, index?) -> U, initital): U", [&] {
+      it("should reduce the values in the array into a single output value of type T.", [&] {
+        array<int> a = { 1, 2, 3 };
+        return expect(a.reduce<double>([&](auto acc, auto cur) {
+          return acc + cur;
+        }, 1.5)).to->equal(7.5)->result();
+      });
+    });
+
+    describe("reverse(): array<T>", [&] {
+      it("should reverses the values in the array and returns a new array.", [&] {
+        array<int> a = { 1, 2, 3 };
+        array<int> expected = { 3, 2, 1 };
+        return expect(a.reverse()).to->equal(expected)->result();
+      });
+    });
+
+    describe("slice(index): array<T>", [&] {
+      it("should return a new array with the values from the specified index.", [&] {
+        array<int> a = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        array<int> b = { 5, 6, 7, 8, 9 };
+        array<int> c = { 9 };
+        array<int> d = { 7, 8, 9 };
+        return expect(a.slice(5)).to->equal(b)->result() + 
+               expect(a.slice(-1)).to->equal(c)->result() +
+               expect(a.slice(-3)).to->equal(d)->result();
+      });
+    });
+
+    describe("slice(begin, end): array<T>", [&] {
+      it("should return a new array with the values from the specified range.", [&] {
+        array<int> a = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        array<int> b = { 5, 6, 7 };
+        return expect(a.slice(5, 8)).to->equal(b)->result();
+      });
+    });
+
+    describe("join(): string", [&] {
+      it("should return a string of the array using ',' as the default seperator.", [&] {
+        array<int> a = { 1, 2, 3 };
+        return expect(a.join()).to->equal("1,2,3")->result();
+      });
+    });
+
+    describe("join(seperator): string", [&] {
+      it("should return a string of the array using a provided seperator.", [&] {
+        array<int> a = { 1, 2, 3 };
+        return expect(a.join(" + ")).to->equal("1 + 2 + 3")->result();
+      });
+    });
+
+    describe("length(): int", [&] {
+      it("should return the number of elements in the array.", [&] {
+        array<int> a = { 1, 2, 3 };
+        return expect(a.length()).to->equal(3)->result();
+      });
+    });
+
+    describe("capacity(): int", [&] {
+      it("should return the capacity of the array.", [&] {
+        array<int> a(10);
+        return expect(a.capacity()).to->equal(10)->result();
+      });
+    });
+
+    describe("is_empty(): int", [&] {
+      it("should true if the array is empty.", [&] {
+        array<int> a;
+        array<int> b(10);
+        return expect(a.is_empty()).to->equal(true)->result() + 
+               expect(b.is_empty()).to->equal(false)->result();
+      });
+    });
+
+    describe("begin(): iterator", [&] {
+      it("should return an iterator pointing to the first element in the array.", [&] {
+        array<int> a = { 1, 2, 3 };
+        auto b = a.begin();
+        return expect(*b).to->equal(1)->result();
+      });
+    });
+
+    describe("end(): iterator", [&] {
+      it("should return an iterator referring to the past-the-end element in the array container.", [&] {
+        array<int> a = { 1, 2, 3 };
+        auto b = a.end();
+        return expect(*(b - 1)).to->equal(3)->result();
+      });
+    });
+  });
+
+  describe("operator", [&] {
+    describe("a[index]", [&] {
+      it("should overload [] to select elements from the array.", [&] {
+        array<int> a = { 1, 2, 3 };
+        return expect(a[0]).to->equal(1)->result() +
+               expect(a[1]).to->equal(2)->result() +
+               expect(a[2]).to->equal(3)->result();
+      });
+    });
+
+    describe("a + b", [&] {
+      it("should concantenate two arrays.", [&] {
+        array<int> a { 1, 2, 3 };
+        array<int> a_copy { 1, 2, 3 };
+        array<int> b { 4, 5, 6 };
+        array<int> c { 1, 2, 3, 4, 5, 6};
+        return expect(a + b).to->equal(c)->result() +
+               expect(a).to->equal(a_copy)->result();
+      });
+    });
+
+    describe("a += b", [&] {
+      it("should concantenates two arrays and assigns it to a", [&] {
+        array<int> a { 1, 2, 3 };
+        array<int> a_copy { 1, 2, 3 };
+        array<int> b { 4, 5, 6 };
+        array<int> c { 1, 2, 3, 4, 5, 6};
+        return expect(a += b).to->equal(c)->result() +
+               expect(a).to->never->equal(a_copy)->result();
+      });
+    });
+
+    describe("a = { 1 }", [&] {
+      it("should assigns the values in a list to a.", [&] {
+        array<int> a = { 1 };
+        return expect(a[0]).to->equal(1)->result();
+      });
+    });
+
+    describe("a * n", [&] {
+      it("should repeat the values in the array by n times.", [&] {
+        array<int> a = { 1 };
+        array<int> b = a * 3;
+        array<int> c = { 1, 1, 1 };
+        return expect(a).to->never->equal(c)->result() +
+               expect(b).to->equal(c)->result();
+      });
+    });
+    
+    describe("a *= n", [&] {
+      it("should repeat the values in the array by n times and assigns it to a.", [&] {
+        array<int> a = { 1 };
+        array<int> a_copy = a;
+        array<int> c = { 1, 1, 1 };
+        return expect(a *= 3).to->equal(c)->result() +
+               expect(a).to->never->equal(a_copy)->result();
+      });
+    });
+
+    describe("ostream << a", [&] {
+      it("should output the contents of the array to the given output stream.", [&] {
+        array<int> a = { 1, 2, 3 };
+        std::stringstream s1;
+        std::stringstream s2;
+        s1 << a;
+        s2 << "[ 1, 2, 3 ]";
+        return expect(s1.str()).to->equal(s2.str())->result();
       });
     });
 

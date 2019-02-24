@@ -15,6 +15,16 @@ prebuilt_cxx_library(
   ],
 )
 
+cxx_binary(
+  name = 'main',
+  srcs = [
+    'main.cpp',
+  ],
+  deps = [
+    '//:array',
+  ] + buckaroo_deps(),
+)
+
 cxx_test(
   name = 'test',
   srcs = [

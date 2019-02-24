@@ -11,6 +11,18 @@
 using std::function;
 using std::ostream;
 using std::string;
+using utils::to_string;
+
+
+inline string to_string(string s) {
+  return "\"" + s + "\"";
+}
+
+inline string to_string(const char* c_str) {
+  string s(c_str);
+  return "\"" + s + "\"";
+}
+
 
 template <class T>
 class array {
@@ -225,7 +237,7 @@ public:
   /**
    * Repeats the values in this array by n times and assigns it to this array.
    */
-  array<T>& operator *= (uint64_t const& right) const {
+  array<T>& operator *= (uint64_t const& right) {
     T * temp = new T[(length_ - offset_) * right];
     auto index = 0;
     for (auto i = 0; i < right; i++) {
@@ -553,11 +565,10 @@ public:
    * Reverses the values in this array and returns a new array.
    */
   array<T> reverse() const {
-    array<T> temp(length_ - offset_);
+    array<T> temp(this->length_ - this->offset_);
     auto index = 0;
-    for(auto i = (length_ - offset_) - 1; i >= 0; i--) {
-      temp[index] = this->operator[](i);
-      index += 1;
+    for(auto i = (length_ - offset_); (i--) > 0;) {
+      temp[index++] = this->operator[](i);
     }
     return temp;
   }
@@ -603,7 +614,7 @@ public:
   string join(const string& seperator) const {
     string result = "";
     this->for_each([&] (T x, auto i) {
-      result += (utils::to_string(x) + ((i == (length_ - offset_) - 1) ? "" : seperator));
+      result += (to_string(x) + ((i == (length_ - offset_) - 1) ? "" : seperator));
     });
     return result;
   }
@@ -652,8 +663,8 @@ public:
   /**
    * Determine whether the array is empty.
    */
-  bool is_empty() const {
-    return (length_ - offset_) == 0;
+  bool is_empty() const  {
+    return begin() == end();
   }
   
   /**
@@ -666,14 +677,14 @@ public:
   /**
    * Returns an iterator pointing to the first element in the array.
    */
-  iterator begin() {
+  iterator begin() const {
     return iterator(array_ + offset_);
   }
 
   /**
    * Returns an iterator referring to the past-the-end element in the array container.
    */
-  iterator end() {
+  iterator end() const {
     return iterator(array_ + (length_ - offset_));
   }
 };

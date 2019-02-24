@@ -8,6 +8,8 @@ To use this library, install [buckaroo](https://github.com/LoopPerfect/buckaroo/
 ```bash
 # Add the latest version
 buckaroo add github.com/iwatakeshi/array/
+# Install the depenencies
+buckaroo install
 ```
 You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/wiki/Version-Constraints-DSL) if you need to.
 
