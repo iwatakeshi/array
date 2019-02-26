@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "array.hpp"
 
 using std::cout;
@@ -63,6 +64,9 @@ int main() {
   cout << d.slice(1, 3) << endl;
   
   cout << d.slice(-1) << endl;
+
+  array<std::string> g = { "Hello", "1", "3", "5" };
+  cout << g << endl;
 
   return 0;
 }

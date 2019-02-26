@@ -8,7 +8,16 @@ To use this library, install [buckaroo](https://github.com/LoopPerfect/buckaroo/
 ```bash
 # Add the latest version
 buckaroo add github.com/iwatakeshi/array/
+# Install the depenencies
+buckaroo install
 ```
+
+To run tests, run the following command
+```
+buck test :test
+
+```
+
 You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/wiki/Version-Constraints-DSL) if you need to.
 
 ## API
