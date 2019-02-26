@@ -295,7 +295,8 @@ int main() {
         array<int> a_copy { 1, 2, 3 };
         array<int> b { 4, 5, 6 };
         array<int> c { 1, 2, 3, 4, 5, 6};
-        return expect(a += b).to->equal(c)->result() +
+        a += b;
+        return expect(a).to->equal(c)->result() +
                expect(a).to->never->equal(a_copy)->result();
       });
     });
@@ -322,7 +323,8 @@ int main() {
         array<int> a = { 1 };
         array<int> a_copy = a;
         array<int> c = { 1, 1, 1 };
-        return expect(a *= 3).to->equal(c)->result() +
+        a *= 3;
+        return expect(a).to->equal(c)->result() +
                expect(a).to->never->equal(a_copy)->result();
       });
     });
@@ -340,7 +342,7 @@ int main() {
 
   });
 
-  std::cout << mocha::output() << std::endl;
+  mocha::print_summary();
 
   return 0;
 }
