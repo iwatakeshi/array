@@ -12,7 +12,7 @@ buckaroo add github.com/iwatakeshi/array/
 buckaroo install
 ```
 
-To run tests, run the following command
+To run tests, run the following command:
 ```
 buck test :test
 
