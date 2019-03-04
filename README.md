@@ -69,7 +69,7 @@ You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/
 
 ```cpp
 #include <iostream>
-#include "array.hpp"
+#include <array.hpp>
 using namespace stdlib;
 using std::cout;
 using std::endl;
