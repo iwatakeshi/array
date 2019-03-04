@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include "array.hpp"
-
+using namespace stdlib;
 using std::cout;
 using std::endl;
 

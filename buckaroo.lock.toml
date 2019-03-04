@@ -1,17 +1,21 @@
-manifest = "31f5f5dbc5435f2c4ebe96be3b8f76224fde5108fc3dc1b7d88bdfd4a45f3976"
+manifest = "46b3ef1492cf8bd36f9fa4a9e9878a9f9d70d97d6315be40cb951b4f893566ca"
 
 [[dependency]]
-package = "github.com/iwatakeshi/mocha"
-target = "//:mocha"
+package = "github.com/iwatakeshi/latte"
+target = "//:latte"
 
 [[dependency]]
 package = "github.com/iwatakeshi/to_string"
 target = "//:to_string"
 
-[lock."github.com/iwatakeshi/mocha"]
+[lock."github.com/iwatakeshi/bench"]
 versions = [ "branch=master" ]
-revision = "44bd7071be6ed832f6fef3e9c60bea01de482126"
+revision = "0fe9e1605ee18500fed023ef364abc1cbf322d0a"
+
+[lock."github.com/iwatakeshi/latte"]
+versions = [ "branch=master" ]
+revision = "124fbe3381d6015e703f002f999770d05b7ad0b8"
 
 [lock."github.com/iwatakeshi/to_string"]
 versions = [ "tag=1.0.0-alpha" ]
-revision = "c22655357fbe44841c79acf12fd7f60d6d317952"
+revision = "b02f78ebbaf245b137e9bb1e4299aced026910a3"

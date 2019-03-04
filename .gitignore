@@ -39,3 +39,5 @@ buck-out
 buckaroo
 buckaroo_macros.bzl
 
+# VSCode
+.vscode/
