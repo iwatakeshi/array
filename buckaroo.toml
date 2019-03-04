@@ -1,7 +1,7 @@
 targets = [ "//:array" ]
 
 [[dependency]]
-package = "github.com/iwatakeshi/mocha"
+package = "github.com/iwatakeshi/latte"
 version = "*"
 
 [[dependency]]

@@ -1,0 +1,15 @@
+BasedOnStyle: Webkit
+AccessModifierOffset: 0
+# AfterNamespace: true
+AllowShortIfStatementsOnASingleLine: true
+BreakBeforeBraces: Attach
+ColumnLimit: 0
+CompactNamespaces: true
+ContinuationIndentWidth: 2
+Cpp11BracedListStyle: false
+IndentCaseLabels: false
+IndentWidth: 2
+NamespaceIndentation: None
+TabWidth: 2
+UseTab: Never
+BreakConstructorInitializers: AfterColon
