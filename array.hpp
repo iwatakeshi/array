@@ -53,13 +53,13 @@ class array {
         ptr_(nullptr) {}
     iterator(T* right) :
         ptr_(right) {}
-    iterator(const iterator& it) :
+    iterator(const self_type& it) :
         ptr_(it.ptr_) {}
-    inline iterator& operator+=(difference_type right) {
+    inline self_type& operator+=(difference_type right) {
       ptr_ += right;
       return *this;
     }
-    inline iterator& operator-=(difference_type right) {
+    inline self_type& operator-=(difference_type right) {
       ptr_ -= right;
       return *this;
     }
@@ -67,40 +67,113 @@ class array {
     inline pointer operator->() const { return ptr_; }
     inline reference operator[](difference_type right) const { return ptr_[right]; }
 
-    inline iterator& operator++() {
+    inline self_type& operator++() {
       ++ptr_;
       return *this;
     }
-    inline iterator& operator--() {
+    inline self_type& operator--() {
       --ptr_;
       return *this;
     }
-    inline iterator operator++(int) {
+    inline self_type operator++(int) {
       iterator tmp(*this);
       ++ptr_;
       return tmp;
     }
-    inline iterator operator--(int) {
+    inline self_type operator--(int) {
       iterator tmp(*this);
       --ptr_;
       return tmp;
     }
-    inline difference_type operator+(const iterator& right) { return ptr_ + right.ptr; }
-    inline difference_type operator-(const iterator& right) const { return ptr_ - right.ptr_; }
-    inline iterator operator+(difference_type right) const { return iterator(ptr_ + right); }
-    inline iterator operator-(difference_type right) const { return iterator(ptr_ - right); }
-    friend inline iterator operator+(difference_type left, const iterator& right) { return iterator(left + right.ptr_); }
-    friend inline iterator operator-(difference_type left, const iterator& right) { return iterator(left - right.ptr_); }
+    inline difference_type operator+(const self_type& right) { return ptr_ + right.ptr; }
+    inline difference_type operator-(const self_type& right) const { return ptr_ - right.ptr_; }
+    inline self_type operator+(difference_type right) const { return iterator(ptr_ + right); }
+    inline self_type operator-(difference_type right) const { return iterator(ptr_ - right); }
+    friend inline self_type operator+(difference_type left, const self_type& right) { return iterator(left + right.ptr_); }
+    friend inline self_type operator-(difference_type left, const self_type& right) { return iterator(left - right.ptr_); }
 
-    inline bool operator==(const iterator& right) const { return ptr_ == right.ptr_; }
-    inline bool operator!=(const iterator& right) const { return ptr_ != right.ptr_; }
-    inline bool operator>(const iterator& right) const { return ptr_ > right.ptr_; }
-    inline bool operator<(const iterator& right) const { return ptr_ < right.ptr_; }
-    inline bool operator>=(const iterator& right) const { return ptr_ >= right.ptr_; }
-    inline bool operator<=(const iterator& right) const { return ptr_ <= right.ptr_; }
+    inline bool operator==(const self_type& right) const { return ptr_ == right.ptr_; }
+    inline bool operator!=(const self_type& right) const { return ptr_ != right.ptr_; }
+    inline bool operator>(const self_type& right) const { return ptr_ > right.ptr_; }
+    inline bool operator<(const self_type& right) const { return ptr_ < right.ptr_; }
+    inline bool operator>=(const self_type& right) const { return ptr_ >= right.ptr_; }
+    inline bool operator<=(const self_type& right) const { return ptr_ <= right.ptr_; }
 
     private:
     pointer ptr_;
+  };
+
+  class const_iterator : public std::iterator<
+                           std::random_access_iterator_tag, // iterator_category
+                           T, // value_type
+                           T, // difference_type
+                           const T*, // pointer
+                           T& // reference
+                           > {
+    /**
+     * Credits
+     * https://stackoverflow.com/a/31886483/1251031
+     */
+    public:
+    typedef const_iterator self_type;
+    typedef T value_type;
+    typedef T& reference;
+    typedef T* pointer;
+    typedef int difference_type;
+    const_iterator() :
+        ptr_(nullptr) {}
+    const_iterator(T* right) :
+        ptr_(right) {}
+    const_iterator(const iterator& it) :
+        ptr_(it.ptr_) {}
+    const_iterator(const self_type& it) :
+        ptr_(it.ptr_) {}
+    inline self_type& operator+=(difference_type right) {
+      ptr_ += right;
+      return *this;
+    }
+    inline self_type& operator-=(difference_type right) {
+      ptr_ -= right;
+      return *this;
+    }
+    inline reference operator*() const { return *ptr_; }
+    inline pointer operator->() const { return ptr_; }
+    inline reference operator[](difference_type right) const { return ptr_[right]; }
+
+    inline self_type& operator++() {
+      ++ptr_;
+      return *this;
+    }
+    inline self_type& operator--() {
+      --ptr_;
+      return *this;
+    }
+    inline self_type operator++(int) {
+      self_type tmp(*this);
+      ++ptr_;
+      return tmp;
+    }
+    inline self_type operator--(int) {
+      self_type tmp(*this);
+      --ptr_;
+      return tmp;
+    }
+    inline difference_type operator+(const self_type& right) { return ptr_ + right.ptr; }
+    inline difference_type operator-(const self_type& right) const { return ptr_ - right.ptr_; }
+    inline self_type operator+(difference_type right) const { return iterator(ptr_ + right); }
+    inline self_type operator-(difference_type right) const { return iterator(ptr_ - right); }
+    friend inline self_type operator+(difference_type left, const self_type& right) { return iterator(left + right.ptr_); }
+    friend inline self_type operator-(difference_type left, const self_type& right) { return iterator(left - right.ptr_); }
+
+    inline bool operator==(const self_type& right) const { return ptr_ == right.ptr_; }
+    inline bool operator!=(const self_type& right) const { return ptr_ != right.ptr_; }
+    inline bool operator>(const self_type& right) const { return ptr_ > right.ptr_; }
+    inline bool operator<(const self_type& right) const { return ptr_ < right.ptr_; }
+    inline bool operator>=(const self_type& right) const { return ptr_ >= right.ptr_; }
+    inline bool operator<=(const self_type& right) const { return ptr_ <= right.ptr_; }
+
+    private:
+    const pointer ptr_;
   };
 
   /**
@@ -671,6 +744,14 @@ class array {
   }
 
   /**
+   * Returns the number of elements in the array.
+   * [Alias]
+   */
+  int64_t size() const {
+    return length();
+  }
+
+  /**
    * Returns the heap capacity of the array.
    */
   int64_t capacity() const {
@@ -685,6 +766,14 @@ class array {
   }
 
   /**
+   * Determine whether the array is empty.
+   * [Alias]
+   */
+  bool empty() const {
+    return is_empty();
+  }
+
+  /**
    * Determine whether the array is full.
    */
   bool is_full() const {
@@ -692,17 +781,38 @@ class array {
   }
 
   /**
+   * Determine whether the array is full.
+   */
+  bool full() const {
+    return is_full();
+  }
+
+  /**
    * Returns an iterator pointing to the first element in the array.
    */
-  iterator begin() const {
+  iterator begin() {
     return iterator(array_ + offset_);
+  }
+
+  /**
+   * Returns an const_iterator pointing to the first element in the array.
+   */
+  const_iterator begin() const {
+    return const_iterator(array_ + offset_);
   }
 
   /**
    * Returns an iterator referring to the past-the-end element in the array container.
    */
-  iterator end() const {
+  iterator end() {
     return iterator(array_ + (length_ - offset_));
+  }
+
+  /**
+   * Returns an iterator referring to the past-the-end element in the array container.
+   */
+  const_iterator end() const {
+    return const_iterator(array_ + (length_ - offset_));
   }
 };
 }
