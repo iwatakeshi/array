@@ -36,7 +36,7 @@ You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/
 | `push(value): void`                                             | *O(1)* | Adds a new value to the end of this array.  |
 | `pop(value): T`                                                 | *O(1)* | Removes the value from the end of this array and returns it.  |
 | `at(index): T`                                                  | *O(1)* | Returns the element at the given index with bound checking. |
-| `at(index, value): T`                                           | *O(1)* | Sets the value at the given index with bound checking. |
+| `at(index, value)`                                              | *O(1)* | Sets the value at the given index with bound checking. |
 | `for_each((value, index?) -> void): void`                       | *O(n)* | Iterates through each value in this array. |
 | `filter((value, index?) -> bool): array<T>`                     | *O(n)* | Filters this array and returns a new array based on a condition. |
 | `map((value, index?) -> T): array<T>`                           | *O(n)* | Maps each value in this array and returns a new array of type `T`. |
