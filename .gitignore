@@ -41,3 +41,6 @@ buckaroo_macros.bzl
 
 # VSCode
 .vscode/
+
+# CMake
+.build/
