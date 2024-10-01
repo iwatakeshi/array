@@ -1,6 +1,6 @@
+#include "include/array.hpp"
 #include <iostream>
 #include <string>
-#include "array.hpp"
 using namespace stdlib;
 using std::cout;
 using std::endl;
@@ -11,7 +11,7 @@ int main() {
   a.push(2);
 
   cout << "a: " << a << endl;
-  
+
   a.for_each([](auto x, auto i) {
     cout << "a: " << i << " - " << x << endl;
   });
@@ -20,7 +20,7 @@ int main() {
 
   b.push(12);
   b.push(3);
-  
+
   cout << "b: " << b << endl;
 
   auto c = a + b;
@@ -31,13 +31,12 @@ int main() {
 
   cout << "a (a + c): " << a << endl;
 
-
   cout << "b * 3: " << b * 3 << endl;
 
   a.unshift(100);
 
   cout << "a: " << a << endl;
-  
+
   a.unshift(200);
 
   cout << "a: " << a << endl;
@@ -48,7 +47,8 @@ int main() {
 
   cout << a.reduce([](auto accumulator, auto current) {
     return accumulator + current;
-  }, 0) << endl;
+  },
+    0) << endl;
 
   cout << a.map([](auto value) {
     return value * 2;
@@ -60,9 +60,8 @@ int main() {
 
   cout << d << endl;
 
-
   cout << d.slice(1, 3) << endl;
-  
+
   cout << d.slice(-1) << endl;
 
   array<std::string> g = { "Hello", "1", "3", "5" };

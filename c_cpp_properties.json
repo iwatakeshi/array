@@ -1,0 +1,82 @@
+{
+  "env": {
+    "myIncludePath": [
+      "${workspaceFolder}/include",
+      "${workspaceFolder}/src",
+      "${workspaceFolder}/lib",
+      "${workspaceFolder}/lib/Catch2/single_include",
+      "${workspaceFolder}/lib/fmt/include"
+    ],
+    "myDefines": []
+  },
+  "configurations": [
+    {
+      "name": "Linux",
+      "compilerPath": "/usr/bin/gcc",
+      "compilerArgs": [
+        "-m32"
+      ],
+      "intelliSenseMode": "linux-gcc-x86",
+      "includePath": [
+        "${myIncludePath}",
+        "/usr/include"
+      ],
+      "defines": [
+        "${myDefines}"
+      ],
+      "cStandard": "gnu11",
+      "cppStandard": "gnu++20",
+      "configurationProvider": "ms-vscode.cmake-tools",
+      "forcedInclude": [
+        "${workspaceFolder}/common.h"
+      ]
+    },
+    {
+      "name": "Mac",
+      "compilerPath": "/usr/bin/clang",
+      "intelliSenseMode": "macos-clang-x64",
+      "includePath": [
+        "${myIncludePath}",
+        "/usr/include",
+        "/usr/local/opt/fmt/include"
+      ],
+      "defines": [
+        "${myDefines}"
+      ],
+      "cStandard": "c11",
+      "cppStandard": "c++20",
+      "configurationProvider": "ms-vscode.cmake-tools",
+      "forcedInclude": [
+        "${workspaceFolder}/common.h"
+      ]
+    },
+    {
+      "name": "Windows",
+      "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/Hostx64/x64/cl.exe",
+      "intelliSenseMode": "windows-msvc-x64",
+      "includePath": [
+        "${myIncludePath}",
+        "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/include",
+        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/ucrt",
+        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/shared",
+        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/um",
+        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/winrt",
+        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/cppwinrt"
+      ],
+      "defines": [
+        "${myDefines}",
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE"
+      ],
+      "cStandard": "c11",
+      "cppStandard": "c++20",
+      "configurationProvider": "ms-vscode.cmake-tools",
+      "forcedInclude": [
+        "${workspaceFolder}/common.h"
+      ]
+    }
+  ],
+  "version": 4,
+  "enableConfigurationSquiggles": true
+}

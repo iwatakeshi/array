@@ -1,24 +1,63 @@
 # `array<T>`
 A JavaScript + Python like array in C++.
 
-## Usage
+## Build Instructions
 
-To use this library, install [buckaroo](https://github.com/LoopPerfect/buckaroo/wiki/Installation#buckaroo) and [buck](https://github.com/LoopPerfect/buckaroo/wiki/Installation#buck). Once installed, [initialize](https://github.com/LoopPerfect/buckaroo/wiki/Commands#init) buckaroo in your project folder and run the following command:
+This project uses CMake as its build system. A Makefile is provided for convenience to simplify the build process.
 
-```bash
-# Add the latest version
-buckaroo add github.com/iwatakeshi/array/
-# Install the depenencies
-buckaroo install
-```
+### Prerequisites
 
-To run tests, run the following command:
-```
-buck test :test
+- C++ compiler with C++20 support
+- CMake (version 3.10 or higher)
+- Make (optional, for using the provided Makefile)
 
-```
+### Building the Project
 
-You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/wiki/Version-Constraints-DSL) if you need to.
+You can build the project using either CMake directly or the provided Makefile.
+
+#### Using the Makefile
+
+1. To build the project:
+   ```
+   make build
+   ```
+
+2. To run tests:
+   ```
+   make test
+   ```
+
+3. To clean the build directory:
+   ```
+   make clean
+   ```
+
+4. For help on available commands:
+   ```
+   make help
+   ```
+
+#### Using CMake Directly
+
+1. Create a build directory:
+   ```
+   mkdir build && cd build
+   ```
+
+2. Configure the project:
+   ```
+   cmake ..
+   ```
+
+3. Build the project:
+   ```
+   cmake --build .
+   ```
+
+4. Run tests:
+   ```
+   ctest
+   ```
 
 ## API
 
@@ -31,10 +70,10 @@ You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/
 
 | Method  |  Performance  |  Description  |
 |---|---|---|
-| `unshift(value): void`                                          | *O(n)* | Adds a new value to the beginning of this array.  |
-| `shift(): T`                                                    | *O(1)* | Removes the value from the beginning of this array and returns it.  |
-| `push(value): void`                                             | *O(1)* | Adds a new value to the end of this array.  |
-| `pop(value): T`                                                 | *O(1)* | Removes the value from the end of this array and returns it.  |
+| `unshift(value): void`                                          | *O(n)* | Adds a new value to the beginning of this array. |
+| `shift(): T`                                                    | *O(1)* | Removes the value from the beginning of this array and returns it. |
+| `push(value): void`                                             | *Amortized O(1)* | Adds a new value to the end of this array. |
+| `pop(value): T`                                                 | *O(1)* | Removes the value from the end of this array and returns it. |
 | `at(index): T`                                                  | *O(1)* | Returns the element at the given index with bound checking. |
 | `at(index, value)`                                              | *O(1)* | Sets the value at the given index with bound checking. |
 | `for_each((value, index?) -> void): void`                       | *O(n)* | Iterates through each value in this array. |
@@ -47,22 +86,22 @@ You can also add a [version constraint](https://github.com/LoopPerfect/buckaroo/
 | `reverse(): array<T>`                                           | *O(n)* | Reverses the values in this array and returns a new array. |
 | `slice(index): array<T>`                                        | *O(n)* | Returns a new array with the values from the specified index. |
 | `slice(begin, end): array<T>`                                   | *O(n)* | Returns a new array with the values from the specified range. |
-| `join(): string`                                                | *O(n)* | Returns a string of this array using `,` as the default seperator. |
-| `join(seperator): string`                                       | *O(n)* | Returns a string of this array using a provided seperator. |
-| `length(): int`                                                 | *O(1)* | Returns the number of elements in this array. |
-| `capacity(): int`                                               | *O(1)* | Returns the capacity of the array. |
-| `is_empty(): int`                                               | *O(1)* | Returns **true** if this array is empty. |
+| `join(): string`                                                | *O(n)* | Returns a string of this array using `,` as the default separator. |
+| `join(separator): string`                                       | *O(n)* | Returns a string of this array using a provided separator. |
+| `size(): size_type`                                             | *O(1)* | Returns the number of elements in this array. |
+| `capacity(): size_type`                                         | *O(1)* | Returns the capacity of the array. |
+| `empty(): bool`                                                 | *O(1)* | Returns **true** if this array is empty. |
 | `begin(): iterator`                                             | *O(1)* | Returns an iterator pointing to the first element in the array. |
 | `end(): iterator`                                               | *O(1)* | Returns an iterator referring to the past-the-end element in the array container. |
 
 |  Operator  |  Performance  |  Description  |
 |---|---|---|
 | `a[index]`     | *O(1)*   | Overloads **[]** to select elements from this array. |
-| `a + b`        | *O(n)*   | Concantenates two arrays. |
-| `a += b`       | *O(n)*   | Concantenates two arrays and assigns it to `a`. |
-| `a = { 1 } `   | *O(n)*   | Assigns the values in a list to `a`. |
-| `a * n`        | *O(n^2)* | Repeats the values in this array by `n` times. |
-| `a *= n`       | *O(n^2)* | Repeats the values in this array by `n` times and assigns it to `a`. |
+| `a + b`        | *O(n + m)* | Concatenates two arrays of sizes n and m. |
+| `a += b`       | *O(n + m)* | Concatenates two arrays of sizes n and m and assigns it to `a`. |
+| `a = { ... }`  | *O(n)*   | Assigns the values in a list to `a`. |
+| `a * n`        | *O(n * m)* | Repeats the values in this array of size n, m times. |
+| `a *= n`       | *O(n * m)* | Repeats the values in this array of size n, m times and assigns it to `a`. |
 | `ostream << a` | *O(n)*   | Outputs the contents of the array to the given output stream. |
 
 ## Example
@@ -89,7 +128,6 @@ int main() {
     cout << "a: " << i << " - " << x << endl;
   });
 
-
   array<int> b;
 
   b.push(12);
@@ -97,13 +135,13 @@ int main() {
   
   cout << "b: " << b << endl;
 
-  // Concantenate two arrays
+  // Concatenate two arrays
   // Note: It does not mutate 'a' or 'b'
   auto c = a + b;
 
   cout << "c (a + b): " << c << endl;
 
-  // Concantenate and assign
+  // Concatenate and assign
   // Note: It does mutate 'a'
   a += c;
 
@@ -121,7 +159,7 @@ int main() {
   array<int> d = { 1, 2, 3, 4 };
 
   // Get a sub list within the range
-  auto e = d.slice(1, 3)
+  auto e = d.slice(1, 3);
   
   cout << "e: " << e << endl;
 
@@ -130,9 +168,9 @@ int main() {
 
   cout << "f: " << f << endl;
 
-  // Use a for-range loop to iterate through the array
-  for (auto& n in f) {
-    cout << f << endl;
+  // Use a range-based for loop to iterate through the array
+  for (auto& n : f) {
+    cout << n << endl;
   }
 
   return 0;

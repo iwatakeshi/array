@@ -2,38 +2,43 @@
 
 cxx_library(
     name = "fmt",
-    srcs = glob([
-        "third_party/fmt/*.cc",
-        "third_party/fmt/*.cpp",
-        "third_party/fmt/src/*.cc", 
-        "third_party/fmt/src/*.cpp", 
-    ]),
-    headers = glob(["third_party/fmt/include/fmt/*.h"]),
-    include_directories = ["third_party/fmt/include"],
+    srcs = [
+        "lib/fmt/src/format.cc",
+    ],
+    include_directories = [
+        "lib/fmt/include",
+    ],
+    compiler_flags = [
+        "-lfmt",
+    ],
     visibility = ["PUBLIC"],
 )
 
 cxx_library(
     name = "array",
-    headers = ["array.hpp"],
+    headers = glob(["include/*.hpp"]),
     deps = [":fmt"],
     visibility = ["PUBLIC"],
+    compiler_flags = [
+        "-std=c++20",
+        "-lfmt",
+    ]
 )
 
 cxx_library(
     name = "catch2",
     srcs = glob([
-        "third_party/catch2/src/*.cpp",
-        "third_party/catch2/src/catch2/*.cpp",
-        "third_party/catch2/src/catch2/**/*.cpp",
+        "lib/catch2/src/*.cpp",
+        "lib/catch2/src/catch2/*.cpp",
+        "lib/catch2/src/catch2/**/*.cpp",
     ]),
     headers = glob([
-        "third_party/catch2/src/*.hpp",
-        "third_party/catch2/src/catch2/*.hpp",
-        "third_party/catch2/src/catch2/**/*.hpp",
+        "lib/catch2/src/*.hpp",
+        "lib/catch2/src/catch2/*.hpp",
+        "lib/catch2/src/catch2/**/*.hpp",
     ]),
     include_directories = [
-        "third_party/catch2/src",
+        "lib/catch2/src",
     ],
     compiler_flags = [
         "-fPIC",
@@ -52,7 +57,7 @@ cxx_binary(
     ],
     include_directories = [
         ".",
-        "third_party/catch2/src",
+        "lib/catch2/src",
     ],
 )
 

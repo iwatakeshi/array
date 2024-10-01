@@ -15,19 +15,27 @@
 #include <string>
 #include <type_traits>
 
+// Check if C++20 <format> is available
+#if defined(__cpp_lib_format)
+#include <format>
+#else
+// If FMT_HEADER_ONLY is defined or <format> is not available, use {fmt}
+#ifndef FMT_HEADER_ONLY
 #define FMT_HEADER_ONLY
+#endif
 #include <fmt/core.h>
 #include <fmt/format.h>
+#endif
 
 namespace stdlib {
 
 /**
  * @brief A dynamic array class template.
- * 
+ *
  * This class provides a dynamic array implementation with various utility functions
  * such as push, pop, insert, and more. It supports iterators and can be used with
  * standard algorithms.
- * 
+ *
  * @tparam T The type of elements stored in the array.
  */
 template <typename T>
@@ -69,7 +77,7 @@ class array {
 
   /**
    * @brief Constructs an array with a specified capacity.
-   * 
+   *
    * @param capacity The initial capacity of the array.
    */
   explicit array(size_type capacity) :
@@ -77,7 +85,7 @@ class array {
 
   /**
    * @brief Constructs an array with a specified capacity and fills it with a value.
-   * 
+   *
    * @param capacity The initial capacity of the array.
    * @param value The value to fill the array with.
    */
@@ -88,7 +96,7 @@ class array {
 
   /**
    * @brief Copy constructor.
-   * 
+   *
    * @param other The array to copy from.
    */
   array(const array& other) :
@@ -99,20 +107,20 @@ class array {
 
   /**
    * @brief Move constructor.
-   * 
+   *
    * @param other The array to move from.
    */
   array(array&&) noexcept = default;
   /**
    * @brief Move assignment operator.
-   * 
+   *
    * @param other The array to move from.
    * @return Reference to this array.
    */
   array& operator=(array&&) noexcept = default;
   /**
    * @brief Constructs an array from an initializer list.
-   * 
+   *
    * @param list The initializer list to construct the array from.
    */
   array(std::initializer_list<T> list) :
@@ -123,38 +131,42 @@ class array {
 
   /**
    * @brief Constructs an array from a range.
-   * 
+   *
    * @tparam Range The type of the range.
    * @param range The range to construct the array from.
    */
   template <typename Range>
-    array(Range&& range, 
-          std::enable_if_t<std::ranges::range<Range>, int> = 0)
-        : array_(std::make_unique<T[]>(std::ranges::distance(range))), 
-          length_(std::ranges::distance(range)), 
-          capacity_(std::ranges::distance(range)) {
-        std::ranges::copy(range, array_.get());
-    }
+  array(Range&& range,
+    std::enable_if_t<std::ranges::range<Range>, int> = 0) :
+      array_(std::make_unique<T[]>(std::ranges::distance(range))),
+      offset_(0),
+      capacity_(std::ranges::distance(range)),
+      length_(std::ranges::distance(range)) {
+    std::ranges::copy(range, array_.get());
+  }
   /**
    * @brief Constructs an array from a pair of iterators.
-   * 
+   *
    * @tparam InputIt The type of the iterators.
    * @param first The first iterator.
    * @param last The last iterator.
    */
   template <typename InputIt>
-    array(InputIt first, InputIt last,
-          std::enable_if_t<!std::is_integral_v<InputIt>, int> = 0)
-        : array_(nullptr), length_(0), capacity_(0), offset_(0) {
-        size_type n = std::distance(first, last);
-        reserve(n);
-        for (auto it = first; it != last; ++it) {
-            push(*it);
-        }
+  array(InputIt first, InputIt last,
+    std::enable_if_t<!std::is_integral_v<InputIt>, int> = 0) :
+      array_(nullptr),
+      offset_(0),
+      capacity_(0),
+      length_(0) {
+    size_type n = std::distance(first, last);
+    reserve(n);
+    for (auto it = first; it != last; ++it) {
+      push(*it);
     }
+  }
   /**
    * @brief Copy assignment operator.
-   * 
+   *
    * @param other The array to copy from.
    * @return Reference to this array.
    */
@@ -167,7 +179,7 @@ class array {
   }
   /**
    * @brief Assignment operator from an initializer list.
-   * 
+   *
    * @param list The initializer list to assign from.
    * @return Reference to this array.
    */
@@ -178,7 +190,7 @@ class array {
   }
   /**
    * @brief Swaps the contents of this array with another array.
-   * 
+   *
    * @param other The array to swap with.
    */
   void swap(array& other) noexcept {
@@ -190,7 +202,7 @@ class array {
   }
   /**
    * @brief Swaps the contents of two arrays.
-   * 
+   *
    * @param lhs The first array.
    * @param rhs The second array.
    */
@@ -199,21 +211,32 @@ class array {
   }
   /**
    * @brief Accesses an element by index.
-   * 
+   *
    * @param index The index of the element.
    * @return Reference to the element.
    */
-  reference operator[](difference_type index) { return array_[offset_ + index]; }
+  reference operator[](difference_type index) {
+    if (index < 0 || static_cast<size_type>(index) >= size()) {
+      throw std::out_of_range("Index out of bounds");
+    }
+    return array_[offset_ + index];
+  }
+
   /**
    * @brief Accesses an element by index (const version).
-   * 
+   *
    * @param index The index of the element.
    * @return Constant reference to the element.
    */
-  const_reference operator[](difference_type index) const { return array_[offset_ + index]; }
+  const_reference operator[](difference_type index) const {
+    if (index < 0 || static_cast<size_type>(index) >= size()) {
+      throw std::out_of_range("Index out of bounds");
+    }
+    return array_[offset_ + index];
+  }
   /**
    * @brief Multiplies the array by a scalar.
-   * 
+   *
    * @param n The scalar to multiply by.
    * @return A new array with the elements repeated n times.
    */
@@ -227,7 +250,7 @@ class array {
   }
   /**
    * @brief Multiplies the array by a scalar and assigns the result to this array.
-   * 
+   *
    * @param n The scalar to multiply by.
    * @return Reference to this array.
    */
@@ -237,7 +260,7 @@ class array {
   }
   /**
    * @brief Concatenates this array with another array.
-   * 
+   *
    * @param other The array to concatenate with.
    * @return A new array with the elements of both arrays.
    */
@@ -250,7 +273,7 @@ class array {
   }
   /**
    * @brief Concatenates another array to this array.
-   * 
+   *
    * @param other The array to concatenate.
    * @return Reference to this array.
    */
@@ -260,7 +283,7 @@ class array {
   }
   /**
    * @brief Compares this array with another array for equality.
-   * 
+   *
    * @param other The array to compare with.
    * @return True if the arrays are equal, false otherwise.
    */
@@ -269,7 +292,7 @@ class array {
   }
   /**
    * @brief Compares this array with another array.
-   * 
+   *
    * @param other The array to compare with.
    * @return The result of the comparison.
    */
@@ -278,36 +301,53 @@ class array {
   }
   /**
    * @brief Outputs the array to a stream.
-   * 
+   *
    * @param os The output stream.
    * @param arr The array to output.
    * @return The output stream.
    */
   friend std::ostream& operator<<(std::ostream& os, const array& arr) {
-    os << "[ " << arr.join(", ") << " ]";
+    os << "[ ";
+    for (size_type i = 0; i < arr.size(); ++i) {
+      if (i > 0) os << ", ";
+      try {
+        os << arr[i];
+      } catch (const std::out_of_range&) {
+        os << "ERROR";
+      }
+    }
+    os << " ]";
     return os;
   }
   /**
    * @brief Adds an element to the beginning of the array.
-   * 
+   *
    * @param value The value to add.
    */
   void unshift(const T& value) {
-    if (offset_ > 0) {
-      array_[--offset_] = value;
+    if (length_ == capacity_) {
+      size_type new_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
+      auto new_array = std::make_unique<T[]>(new_capacity);
+      std::move(begin(), end(), new_array.get() + 1);
+      new_array[0] = value;
+      array_ = std::move(new_array);
+      capacity_ = new_capacity;
+      offset_ = 0;
       ++length_;
     } else {
-      size_type new_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
-      reserve(new_capacity);
-      std::shift_right(begin(), end(), 1);
-      array_[0] = value;
+      if (offset_ > 0) {
+        --offset_;
+      } else {
+        std::move_backward(begin(), end(), end() + 1);
+      }
+      array_[offset_] = value;
       ++length_;
     }
   }
 
   /**
    * @brief Removes and returns the first element of the array.
-   * 
+   *
    * @return The first element of the array.
    * @throws std::out_of_range If the array is empty.
    */
@@ -315,14 +355,26 @@ class array {
     if (empty()) {
       throw std::out_of_range("Array is empty");
     }
+
     T value = std::move(array_[offset_]);
     ++offset_;
     --length_;
+
+    // If the array becomes empty after shift, reset offset
+    if (length_ == 0) {
+      offset_ = 0;
+    }
+    // If offset is too large, move elements to the front
+    else if (offset_ > capacity_ / 2) {
+      std::move(begin(), end(), array_.get());
+      offset_ = 0;
+    }
+
     return value;
   }
   /**
    * @brief Adds an element to the end of the array.
-   * 
+   *
    * @param value The value to add.
    */
   void push(const T& value) {
@@ -334,7 +386,7 @@ class array {
   }
   /**
    * @brief Removes and returns the last element of the array.
-   * 
+   *
    * @return The last element of the array.
    * @throws std::out_of_range If the array is empty.
    */
@@ -346,33 +398,27 @@ class array {
   }
   /**
    * @brief Accesses an element by index with bounds checking.
-   * 
+   *
    * @param index The index of the element.
    * @return Reference to the element.
    * @throws std::out_of_range If the index is out of bounds.
    */
   reference at(difference_type index) {
-    if (index < 0 || static_cast<size_type>(index) >= size()) {
-      throw std::out_of_range("Index out of bounds");
-    }
     return (*this)[index];
   }
   /**
    * @brief Accesses an element by index with bounds checking (const version).
-   * 
+   *
    * @param index The index of the element.
    * @return Constant reference to the element.
    * @throws std::out_of_range If the index is out of bounds.
    */
   const_reference at(difference_type index) const {
-    if (index < 0 || static_cast<size_type>(index) >= size()) {
-      throw std::out_of_range("Index out of bounds");
-    }
     return (*this)[index];
   }
   /**
    * @brief Applies a function to each element of the array.
-   * 
+   *
    * @param f The function to apply.
    */
   void for_each(const std::function<void(T)>& f) const {
@@ -380,7 +426,7 @@ class array {
   }
   /**
    * @brief Applies a function to each element of the array, passing the index as well.
-   * 
+   *
    * @param f The function to apply.
    */
   void for_each(const std::function<void(T, size_type)>& f) const {
@@ -390,7 +436,7 @@ class array {
   }
   /**
    * @brief Filters the array using a predicate.
-   * 
+   *
    * @tparam Pred The type of the predicate.
    * @param pred The predicate to use for filtering.
    * @return A new array with the elements that satisfy the predicate.
@@ -401,7 +447,7 @@ class array {
   }
   /**
    * @brief Filters the array using a predicate, passing the index as well.
-   * 
+   *
    * @tparam Pred The type of the predicate.
    * @param pred The predicate to use for filtering.
    * @return A new array with the elements that satisfy the predicate.
@@ -418,7 +464,7 @@ class array {
   }
   /**
    * @brief Maps the array using a function.
-   * 
+   *
    * @tparam F The type of the function.
    * @param f The function to use for mapping.
    * @return A new array with the mapped elements.
@@ -429,7 +475,7 @@ class array {
   }
   /**
    * @brief Maps the array using a function, passing the index as well.
-   * 
+   *
    * @tparam F The type of the function.
    * @param f The function to use for mapping.
    * @return A new array with the mapped elements.
@@ -445,7 +491,7 @@ class array {
   }
   /**
    * @brief Reduces the array to a single value using a function.
-   * 
+   *
    * @tparam U The type of the result.
    * @param f The function to use for reducing.
    * @param initial The initial value.
@@ -457,7 +503,7 @@ class array {
   }
   /**
    * @brief Reduces the array to a single value using a function.
-   * 
+   *
    * @tparam Func The type of the function.
    * @param func The function to use for reducing.
    * @param initial The initial value.
@@ -473,7 +519,7 @@ class array {
   }
   /**
    * @brief Reverses the array.
-   * 
+   *
    * @return A new array with the elements in reverse order.
    */
   array reverse() const {
@@ -483,7 +529,7 @@ class array {
   }
   /**
    * @brief Slices the array.
-   * 
+   *
    * @param start The start index.
    * @param end The end index (default is -1, which means the end of the array).
    * @return A new array with the sliced elements.
@@ -496,7 +542,7 @@ class array {
   }
   /**
    * @brief Joins the elements of the array into a string.
-   * 
+   *
    * @param sep The separator to use (default is ",").
    * @return A string with the joined elements.
    */
@@ -508,7 +554,7 @@ class array {
   }
   /**
    * @brief Reserves memory for the array.
-   * 
+   *
    * @param new_capacity The new capacity of the array.
    */
   void reserve(size_type new_capacity) {
@@ -524,24 +570,24 @@ class array {
 
   /**
    * @brief Inserts elements into the array at a specified position.
-   * 
+   *
    * This function inserts a range of elements into the array at the specified position.
    * If the current capacity is insufficient to accommodate the new elements, the array
    * is reallocated with a larger capacity.
-   * 
+   *
    * @tparam InputIt The type of the input iterator.
    * @param pos The position to insert at. This must be a valid iterator within the array.
    * @param first The first iterator of the range to insert.
    * @param last The last iterator of the range to insert.
-   * 
+   *
    * @pre `pos` must be a valid iterator within the array.
    * @pre The range `[first, last)` must be a valid range.
-   * 
+   *
    * @post The elements in the range `[first, last)` are inserted at the position `pos`.
    *       The size of the array is increased by the number of elements inserted.
-   * 
+   *
    * @throws std::bad_alloc if memory allocation fails.
-   * 
+   *
    * @note If the array is reallocated, all iterators, pointers, and references to elements
    *       in the array are invalidated.
    */
@@ -563,21 +609,21 @@ class array {
 
   /**
    * @brief Inserts an element into the array at a specified position.
-   * 
+   *
    * This function inserts an element into the array at the specified position.
    * If the current capacity is insufficient to accommodate the new element, the array
    * is reallocated with a larger capacity.
-   * 
+   *
    * @param pos The position to insert at. This must be a valid iterator within the array.
    * @param value The value to insert.
-   * 
+   *
    * @pre `pos` must be a valid iterator within the array.
-   * 
+   *
    * @post The element `value` is inserted at the position `pos`.
    *       The size of the array is increased by one.
-   * 
+   *
    * @throws std::bad_alloc if memory allocation fails.
-   * 
+   *
    * @note If the array is reallocated, all iterators, pointers, and references to elements
    *       in the array are invalidated.
    */
@@ -585,8 +631,8 @@ class array {
     assert(pos >= begin() && pos <= end()); // Ensure pos is within valid range
     auto pos_index = pos - begin();
     if (size() + 1 > capacity_) {
-        reserve((size() + 1) * 2);
-        pos = begin() + pos_index; // Update pos after reserve
+      reserve((size() + 1) * 2);
+      pos = begin() + pos_index; // Update pos after reserve
     }
     pos_index = pos - begin();
     // Shift elements to the right
@@ -594,34 +640,41 @@ class array {
     // Insert the new element
     array_[pos_index] = value;
     ++length_;
-}
+  }
 
   /// @return The the size of the array.
-  [[nodiscard]] size_type size() const noexcept { return length_ - offset_; }
+  [[nodiscard]] size_type size() const noexcept {
+    size_type s = length_;
+    return s;
+  }
   /// @return The capacity of the array.
   [[nodiscard]] size_type capacity() const noexcept { return capacity_; }
-  /// @brief Determines if the array is empty. 
+  /// @brief Determines if the array is empty.
   [[nodiscard]] bool empty() const noexcept { return size() == 0; }
   /// @brief Determines if the array is full.
   [[nodiscard]] bool full() const noexcept { return size() == capacity_; }
   /// @return An iterator to the beginning of the array.
-  iterator begin() noexcept { return array_.get() + offset_; }
+  iterator begin() noexcept {
+    return array_.get() + offset_;
+  }
   /// @return A const iterator to the beginning of the array.
   const_iterator begin() const noexcept { return array_.get() + offset_; }
   /// @return An iterator to the end of the array.
-  iterator end() noexcept { return array_.get() + length_; }
+  iterator end() noexcept {
+    return array_.get() + offset_ + length_;
+  }
   /// @return A const iterator to the end of the array.
   const_iterator end() const noexcept { return array_.get() + length_; }
 
   private:
   template <typename U>
   static std::string to_string(const U& value) {
-        if constexpr (is_string) {
-            return fmt::format("\"{}\"", value);
-        } else {
-            return fmt::format("{}", value);
-        }
+    if constexpr (is_string) {
+      return fmt::format("\"{}\"", value);
+    } else {
+      return fmt::format("{}", value);
     }
+  }
 };
 
 } // namespace stdlib
