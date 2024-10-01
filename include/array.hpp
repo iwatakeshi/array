@@ -14,18 +14,8 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
-
-// Check if C++20 <format> is available
-#if defined(__cpp_lib_format)
-#include <format>
-#else
-// If FMT_HEADER_ONLY is defined or <format> is not available, use {fmt}
-#ifndef FMT_HEADER_ONLY
-#define FMT_HEADER_ONLY
-#endif
 #include <fmt/core.h>
 #include <fmt/format.h>
-#endif
 
 namespace stdlib {
 
