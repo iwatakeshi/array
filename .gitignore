@@ -44,3 +44,4 @@ buckaroo_macros.bzl
 
 # CMake
 .build/
+build/
