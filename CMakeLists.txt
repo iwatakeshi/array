@@ -40,27 +40,56 @@ endif()
 # Source files
 file(GLOB SRC_FILES src/*.cpp)
 file(GLOB TEST_FILES test/*.cpp)
-set(SOURCES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
-# Add the executable target for the main application
-add_executable(main ${SOURCES})
+# Add the library target for the public interface
+add_library(array INTERFACE)
+target_include_directories(array INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(array INTERFACE fmt::fmt)
 
-# Link fmt to the main executable
+# Add the executable target for the main application (for testing purposes)
+add_executable(main ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 target_link_libraries(main PRIVATE fmt::fmt)
 
 # Add the test executable
 add_executable(test_runner ${TEST_FILES})
-
-# Link Catch2 to the test_runner executable
 target_link_libraries(test_runner PRIVATE Catch2::Catch2WithMain fmt::fmt)
 
 # Enable CTest
 include(CTest)
 include(Catch)
-
-# Automatically discover and register tests
 catch_discover_tests(test_runner)
 
-# Optionally, you can set up custom options for Catch2 tests here
-# For example:
-set(CMAKE_CATCH_DISCOVER_TESTS_DISCOVERY_MODE POST_BUILD) # Change discovery mode if needed
+# Install the library headers
+install(DIRECTORY include/ DESTINATION include)
+
+# Export the targets
+install(TARGETS array EXPORT ArrayTargets)
+
+# Generate and install the CMake configuration files
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/ArrayConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/ArrayConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/ArrayConfig.cmake"
+  INSTALL_DESTINATION lib/cmake/Array
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/ArrayConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/ArrayConfigVersion.cmake"
+  DESTINATION lib/cmake/Array
+)
+
+install(EXPORT ArrayTargets
+  FILE ArrayTargets.cmake
+  NAMESPACE Array::
+  DESTINATION lib/cmake/Array
+)

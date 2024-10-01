@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(fmt 8.0.1)
+
+include("${CMAKE_CURRENT_LIST_DIR}/ArrayTargets.cmake")
