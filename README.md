@@ -11,6 +11,11 @@ This project uses CMake as its build system. A Makefile is provided for convenie
 - CMake (version 3.10 or higher)
 - Make (optional, for using the provided Makefile)
 
+### Dependencies
+
+- `fmt` library for formatting strings
+- `Catch2` framework for unit testing
+
 ### Building the Project
 
 You can build the project using either CMake directly or the provided Makefile.
