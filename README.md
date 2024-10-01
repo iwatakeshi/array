@@ -1,6 +1,8 @@
 # `array<T>`
 A JavaScript + Python like array in C++.
 
+[![CMake](https://github.com/iwatakeshi/array/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/iwatakeshi/array/actions/workflows/cmake-single-platform.yml)
+
 ## Build Instructions
 
 This project uses CMake as its build system. A Makefile is provided for convenience to simplify the build process.
