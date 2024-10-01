@@ -46,9 +46,9 @@ int main() {
 
   cout << "a: " << a << endl;
 
-  cout << a.reduce([](auto accumulator, auto current) -> int {
+  cout << a.reduce([](auto accumulator, auto current) {
     return accumulator + current;
-  }) << endl;
+  }, 0) << endl;
 
   cout << a.map([](auto value) {
     return value * 2;

@@ -1,820 +1,629 @@
 #ifndef STD_LIB_ARRAY_H
 #define STD_LIB_ARRAY_H
+
 #include <algorithm>
+#include <cassert>
+#include <concepts>
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <memory>
+#include <numeric>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <to_string.hpp>
+#include <type_traits>
+
+#define FMT_HEADER_ONLY
+#include <fmt/core.h>
+#include <fmt/format.h>
 
 namespace stdlib {
 
-template <class T>
+/**
+ * @brief A dynamic array class template.
+ * 
+ * This class provides a dynamic array implementation with various utility functions
+ * such as push, pop, insert, and more. It supports iterators and can be used with
+ * standard algorithms.
+ * 
+ * @tparam T The type of elements stored in the array.
+ */
+template <typename T>
 class array {
   private:
-  // The pointer array
-  T* array_ = nullptr;
-  // The offset after an element is removed
-  // from the front of the array.
-  // This allows the array to have a O(1) when
-  // removing an element from the front.
-  uint64_t offset_ = 0;
-  // The heap capacity.
-  uint64_t capacity_ = 0;
-  // The number of elements in the array.
-  uint64_t length_ = 0;
+  /// @brief Pointer to the dynamically allocated array.
+  std::unique_ptr<T[]> array_;
+  /// @brief The offset of the first element in the array.
+  std::size_t offset_ = 0;
+  /// @brief The capacity of the array.
+  std::size_t capacity_ = 0;
+  /// @brief The length of the array.
+  std::size_t length_ = 0;
 
-  struct is_string
-      : std::integral_constant<
-          bool,
-          std::is_same<char const*, typename std::decay<T>::type>::value || std::is_same<char*, typename std::decay<T>::type>::value || std::is_same<std::string, typename std::decay<T>::type>::value> {};
+  static constexpr bool is_string = std::is_same_v<std::remove_cvref_t<T>, const char*> || std::is_same_v<std::remove_cvref_t<T>, char*> || std::is_same_v<std::remove_cvref_t<T>, std::string>;
 
   public:
-  class iterator : public std::iterator<
-                     std::random_access_iterator_tag, // iterator_category
-                     T, // value_type
-                     T, // difference_type
-                     const T*, // pointer
-                     T& // reference
-                     > {
-    /**
-     * Credits
-     * https://stackoverflow.com/a/31886483/1251031
-     */
-    public:
-    typedef iterator self_type;
-    typedef T value_type;
-    typedef T& reference;
-    typedef T* pointer;
-    typedef int difference_type;
-    iterator() :
-        ptr_(nullptr) {}
-    iterator(T* right) :
-        ptr_(right) {}
-    iterator(const self_type& it) :
-        ptr_(it.ptr_) {}
-    inline self_type& operator+=(difference_type right) {
-      ptr_ += right;
-      return *this;
-    }
-    inline self_type& operator-=(difference_type right) {
-      ptr_ -= right;
-      return *this;
-    }
-    inline reference operator*() const { return *ptr_; }
-    inline pointer operator->() const { return ptr_; }
-    inline reference operator[](difference_type right) const { return ptr_[right]; }
+  /// @brief The type of elements stored in the array.
+  using value_type = T;
+  /// @brief The type of size of the array.
+  using size_type = std::size_t;
+  /// @brief The type of difference between iterators.
+  using difference_type = std::ptrdiff_t;
+  /// @brief The type of reference to elements.
+  using reference = T&;
+  /// @brief The type of const reference to elements.
+  using const_reference = const T&;
+  /// @brief The type of pointer to elements.
+  using pointer = T*;
+  /// @brief The type of const pointer to elements.
+  using const_pointer = const T*;
+  /// @brief The type of iterator.
+  using iterator = T*;
+  /// @brief The type of const iterator.
+  using const_iterator = const T*;
 
-    inline self_type& operator++() {
-      ++ptr_;
-      return *this;
-    }
-    inline self_type& operator--() {
-      --ptr_;
-      return *this;
-    }
-    inline self_type operator++(int) {
-      iterator tmp(*this);
-      ++ptr_;
-      return tmp;
-    }
-    inline self_type operator--(int) {
-      iterator tmp(*this);
-      --ptr_;
-      return tmp;
-    }
-    inline difference_type operator+(const self_type& right) { return ptr_ + right.ptr; }
-    inline difference_type operator-(const self_type& right) const { return ptr_ - right.ptr_; }
-    inline self_type operator+(difference_type right) const { return iterator(ptr_ + right); }
-    inline self_type operator-(difference_type right) const { return iterator(ptr_ - right); }
-    friend inline self_type operator+(difference_type left, const self_type& right) { return iterator(left + right.ptr_); }
-    friend inline self_type operator-(difference_type left, const self_type& right) { return iterator(left - right.ptr_); }
-
-    inline bool operator==(const self_type& right) const { return ptr_ == right.ptr_; }
-    inline bool operator!=(const self_type& right) const { return ptr_ != right.ptr_; }
-    inline bool operator>(const self_type& right) const { return ptr_ > right.ptr_; }
-    inline bool operator<(const self_type& right) const { return ptr_ < right.ptr_; }
-    inline bool operator>=(const self_type& right) const { return ptr_ >= right.ptr_; }
-    inline bool operator<=(const self_type& right) const { return ptr_ <= right.ptr_; }
-
-    private:
-    pointer ptr_;
-  };
-
-  class const_iterator : public std::iterator<
-                           std::random_access_iterator_tag, // iterator_category
-                           T, // value_type
-                           T, // difference_type
-                           const T*, // pointer
-                           T& // reference
-                           > {
-    /**
-     * Credits
-     * https://stackoverflow.com/a/31886483/1251031
-     */
-    public:
-    typedef const_iterator self_type;
-    typedef T value_type;
-    typedef T& reference;
-    typedef T* pointer;
-    typedef int difference_type;
-    const_iterator() :
-        ptr_(nullptr) {}
-    const_iterator(T* right) :
-        ptr_(right) {}
-    const_iterator(const iterator& it) :
-        ptr_(it.ptr_) {}
-    const_iterator(const self_type& it) :
-        ptr_(it.ptr_) {}
-    inline self_type& operator+=(difference_type right) {
-      ptr_ += right;
-      return *this;
-    }
-    inline self_type& operator-=(difference_type right) {
-      ptr_ -= right;
-      return *this;
-    }
-    inline reference operator*() const { return *ptr_; }
-    inline pointer operator->() const { return ptr_; }
-    inline reference operator[](difference_type right) const { return ptr_[right]; }
-
-    inline self_type& operator++() {
-      ++ptr_;
-      return *this;
-    }
-    inline self_type& operator--() {
-      --ptr_;
-      return *this;
-    }
-    inline self_type operator++(int) {
-      self_type tmp(*this);
-      ++ptr_;
-      return tmp;
-    }
-    inline self_type operator--(int) {
-      self_type tmp(*this);
-      --ptr_;
-      return tmp;
-    }
-    inline difference_type operator+(const self_type& right) { return ptr_ + right.ptr; }
-    inline difference_type operator-(const self_type& right) const { return ptr_ - right.ptr_; }
-    inline self_type operator+(difference_type right) const { return iterator(ptr_ + right); }
-    inline self_type operator-(difference_type right) const { return iterator(ptr_ - right); }
-    friend inline self_type operator+(difference_type left, const self_type& right) { return iterator(left + right.ptr_); }
-    friend inline self_type operator-(difference_type left, const self_type& right) { return iterator(left - right.ptr_); }
-
-    inline bool operator==(const self_type& right) const { return ptr_ == right.ptr_; }
-    inline bool operator!=(const self_type& right) const { return ptr_ != right.ptr_; }
-    inline bool operator>(const self_type& right) const { return ptr_ > right.ptr_; }
-    inline bool operator<(const self_type& right) const { return ptr_ < right.ptr_; }
-    inline bool operator>=(const self_type& right) const { return ptr_ >= right.ptr_; }
-    inline bool operator<=(const self_type& right) const { return ptr_ <= right.ptr_; }
-
-    private:
-    const pointer ptr_;
-  };
+  /// @brief Default constructor.
+  array() = default;
 
   /**
-  * 	Initializes a new empty array.
-  */
-  array() {}
-
-  /**
-   * 	Initializes a new array storing n copies of zeroes.
+   * @brief Constructs an array with a specified capacity.
+   * 
+   * @param capacity The initial capacity of the array.
    */
-  array(uint64_t capacity) {
-    reserve(capacity);
-    length_ = capacity;
-  }
+  explicit array(size_type capacity) :
+      array_(std::make_unique<T[]>(capacity)), capacity_(capacity), length_(capacity) { }
 
   /**
-   * 	Initializes a new array storing n copies of the given value.
+   * @brief Constructs an array with a specified capacity and fills it with a value.
+   * 
+   * @param capacity The initial capacity of the array.
+   * @param value The value to fill the array with.
    */
-  array(uint64_t capacity, T const& value) :
+  array(size_type capacity, const T& value) :
       array(capacity) {
-    for (auto i = 0; i < capacity; i++) {
-      array_[i] = value;
-    }
-  }
-
-  array(array const& other) {
-    reserve(other.capacity_, false);
-    for (auto i = 0; i < other.capacity_; i++) {
-      array_[i] = other.array_[i];
-    }
-
-    offset_ = other.offset_;
-    capacity_ = other.capacity_;
-    length_ = other.length_;
+    std::fill_n(array_.get(), capacity, value);
   }
 
   /**
-   * 	Initializes a new array with list initialization.
+   * @brief Copy constructor.
+   * 
+   * @param other The array to copy from.
    */
-  array(std::initializer_list<T> const& list) {
-    reserve(list.size(), false);
-    int64_t count = 0;
+  array(const array& other) :
+      array_(std::make_unique<T[]>(other.capacity_)),
+      offset_(other.offset_), capacity_(other.capacity_), length_(other.length_) {
+    std::copy_n(other.array_.get(), capacity_, array_.get());
+  }
+
+  /**
+   * @brief Move constructor.
+   * 
+   * @param other The array to move from.
+   */
+  array(array&&) noexcept = default;
+  /**
+   * @brief Move assignment operator.
+   * 
+   * @param other The array to move from.
+   * @return Reference to this array.
+   */
+  array& operator=(array&&) noexcept = default;
+  /**
+   * @brief Constructs an array from an initializer list.
+   * 
+   * @param list The initializer list to construct the array from.
+   */
+  array(std::initializer_list<T> list) :
+      array_(std::make_unique<T[]>(list.size())),
+      capacity_(list.size()), length_(list.size()) {
     std::copy(list.begin(), list.end(), begin());
-    length_ = list.size();
-  }
-
-  ~array() {
-    delete[] array_;
-    offset_ = 0;
-    capacity_ = 0;
-    length_ = 0;
   }
 
   /**
-   * Overloads [] to select elements from this array.
+   * @brief Constructs an array from a range.
+   * 
+   * @tparam Range The type of the range.
+   * @param range The range to construct the array from.
    */
-  T& operator[](int64_t const& index) {
-    return array_[offset_ + index];
-  }
-
-  /**
-   * Overloads [] to select elements from this array.
-   */
-  const T& operator[](int64_t const& index) const {
-    return array_[offset_ + index];
-  }
-
-  /**
-   * Repeats the values in this array by n times.
-   */
-  array<T> operator*(uint64_t const& right) const {
-    array<T> temp;
-    for (auto i = 0; i < right; i++) {
-      for (auto j = 0; j < (length_ - offset_); j++) {
-        temp.push(this->operator[](j));
-      }
+  template <typename Range>
+    array(Range&& range, 
+          std::enable_if_t<std::ranges::range<Range>, int> = 0)
+        : array_(std::make_unique<T[]>(std::ranges::distance(range))), 
+          length_(std::ranges::distance(range)), 
+          capacity_(std::ranges::distance(range)) {
+        std::ranges::copy(range, array_.get());
     }
-
-    return temp;
-  }
-
   /**
-   * Assigns this array with the array on the right hand side.
+   * @brief Constructs an array from a pair of iterators.
+   * 
+   * @tparam InputIt The type of the iterators.
+   * @param first The first iterator.
+   * @param last The last iterator.
    */
-  array<T>& operator=(array<T> const& right) {
-    if (capacity_ < right.capacity_) {
-      reserve(right.capacity_, false);
-    }
-
-    capacity_ = right.capacity_;
-    offset_ = right.offset_;
-    length_ = right.length_ + right.offset_;
-
-    for (auto i = 0; i < capacity_; i++) {
-      array_[i] = right.array_[i];
-    }
-
-    return *this;
-  }
-
-  /**
-   * Assigns this array with the array on the right hand side.
-   */
-  array<T>& operator=(std::initializer_list<T> const& list) {
-    T* temp = new T[list.size()];
-    auto index = 0;
-    for (auto element : list) {
-      temp[index++] = element;
-    }
-
-    delete[] array_;
-    array_ = temp;
-    capacity_ = list.size();
-    length_ = capacity_;
-    offset_ = 0;
-
-    return *this;
-  }
-
-  /**
-   * Concantenates two arrays.
-   */
-  array<T> operator+(array<T> const& right) const {
-    array<T> temp;
-
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      temp.push(this->operator[](i));
-    }
-
-    for (auto i = 0; i < (right.length_ - right.offset_); i++) {
-      temp.push(right.operator[](i));
-    }
-
-    return temp;
-  }
-
-  /**
-   * Concantenates two arrays and assigns it to this array.
-   */
-  array<T>& operator+=(array<T> const& right) {
-    for (auto i = 0; i < (right.length_ - right.offset_); i++) {
-      this->push(right.operator[](i));
-    }
-
-    return *this;
-  }
-
-  /**
-   * Repeats the values in this array by n times and assigns it to this array.
-   */
-  array<T>& operator*=(uint64_t const& right) {
-    T* temp = new T[(length_ - offset_) * right];
-    auto index = 0;
-    for (auto i = 0; i < right; i++) {
-      for (auto j = 0; j < (length_ - offset_); j++) {
-        temp[index] = this->operator[](j);
-        index += 1;
-      }
-    }
-
-    delete[] array_;
-    array_ = temp;
-    capacity_ = ((length_ - offset_)) * right;
-    length_ = capacity_;
-    offset_ = 0;
-
-    return *this;
-  }
-
-  /**
-   * Compares the equality of each value within two arrays of type T.
-   */
-  bool operator==(array<T> const& right) {
-    if ((length_ - offset_) == (right.length_ - right.offset_)) {
-      for (auto i = 0; i < (length_ - offset_); i++) {
-        if (this->operator[](i) != right[i]) {
-          return false;
+  template <typename InputIt>
+    array(InputIt first, InputIt last,
+          std::enable_if_t<!std::is_integral_v<InputIt>, int> = 0)
+        : array_(nullptr), length_(0), capacity_(0), offset_(0) {
+        size_type n = std::distance(first, last);
+        reserve(n);
+        for (auto it = first; it != last; ++it) {
+            push(*it);
         }
-      }
-      return true;
     }
-    return false;
-  }
-
   /**
-   * Compares the equality of each value within two arrays of type T and U.
+   * @brief Copy assignment operator.
+   * 
+   * @param other The array to copy from.
+   * @return Reference to this array.
    */
-  template <typename U>
-  friend bool operator==(array<T> const& left, array<U> const& right) {
-    if (left.length() == right.length()) {
-      for (auto i = 0; i < right.length(); i++) {
-        if (left[i] != right[i]) {
-          return false;
-        }
-      }
-      return true;
+  array& operator=(const array& other) {
+    if (this != &other) {
+      array temp(other);
+      swap(temp);
     }
-    return false;
+    return *this;
   }
-
   /**
-   * Compares the in-equality of each value within two arrays of type T.
+   * @brief Assignment operator from an initializer list.
+   * 
+   * @param list The initializer list to assign from.
+   * @return Reference to this array.
    */
-  bool operator!=(array<T> const& right) {
-    return !(this->operator==(right));
+  array& operator=(std::initializer_list<T> list) {
+    array temp(list);
+    swap(temp);
+    return *this;
   }
-
   /**
-   * Compares the equality of each value within two arrays of type T and U.
+   * @brief Swaps the contents of this array with another array.
+   * 
+   * @param other The array to swap with.
    */
-  template <typename U>
-  friend bool operator!=(array<T> const& left, array<U> const& right) {
-    return !(left == right);
+  void swap(array& other) noexcept {
+    using std::swap;
+    swap(array_, other.array_);
+    swap(offset_, other.offset_);
+    swap(capacity_, other.capacity_);
+    swap(length_, other.length_);
   }
-
   /**
-   * Outputs the contents of the array to the given output stream.
+   * @brief Swaps the contents of two arrays.
+   * 
+   * @param lhs The first array.
+   * @param rhs The second array.
    */
-  friend std::ostream& operator<<(std::ostream& os, const array<T>& array) {
-    os << "[ " << array.join(", ") << " ]";
-    return os;
+  friend void swap(array& lhs, array& rhs) noexcept {
+    lhs.swap(rhs);
   }
-
   /**
-   * Adds a new value to the beginning of this array.
+   * @brief Accesses an element by index.
+   * 
+   * @param index The index of the element.
+   * @return Reference to the element.
    */
-  void unshift(T const& value) {
-    // Determine if the array is full
-    auto capacity = 0;
-    if (capacity_ == 0) {
-      capacity = std::max((uint64_t)1, (uint64_t)(capacity_ * 2));
-    } else {
-      capacity = is_full() ? 2 * capacity_ : (length_ - offset_) + 1;
-    }
-
-    T* array = new T[capacity];
-
-    array[0] = value;
-
-    for (auto i = 1; i <= (length_ - offset_); i++) {
-      array[i] = this->operator[]((i - 1));
-    }
-
-    delete[] array_;
-    array_ = array;
-
-    length_ += 1;
-    capacity_ = capacity;
-  }
-
+  reference operator[](difference_type index) { return array_[offset_ + index]; }
   /**
-   * Removes the value from the beginning of this array and returns it.
+   * @brief Accesses an element by index (const version).
+   * 
+   * @param index The index of the element.
+   * @return Constant reference to the element.
    */
-  T& shift() {
-    if (is_empty()) {
-      throw std::out_of_range("Array is empty");
-    }
-
-    T& element = array_[offset_];
-    offset_ += 1;
-
-    return element;
-  }
-
+  const_reference operator[](difference_type index) const { return array_[offset_ + index]; }
   /**
-   * Adds a new value to the end of this array.
+   * @brief Multiplies the array by a scalar.
+   * 
+   * @param n The scalar to multiply by.
+   * @return A new array with the elements repeated n times.
    */
-  void push(T const& value) {
-    // Determine if the array is full
-    if (capacity_ == 0) {
-      reserve(std::max((uint64_t)1, (uint64_t)capacity_ * 2), false);
-    } else if (is_full()) {
-      reserve(2 * capacity_, true);
+  array operator*(size_type n) const {
+    array result;
+    result.reserve(size() * n);
+    for (size_type i = 0; i < n; ++i) {
+      result.insert(result.end(), begin(), end());
     }
-
-    array_[(length_ - offset_)] = value;
-    length_ += 1;
-  }
-
-  /**
-   * Removes the value from the end of this array and returns it.
-   */
-  T& pop() {
-    if (is_empty()) {
-      throw std::out_of_range("Array is empty");
-    }
-
-    T& element = array_[(length_ - offset_) - 1];
-    length_ -= 1;
-
-    return element;
-  }
-
-  /**
-   * Returns the element at the given index with bound checking.
-   */
-  T& at(int64_t index) {
-    if (index < 0 || index >= (length_ - offset_)) {
-      throw std::out_of_range("Index is out of bounds");
-    }
-
-    return this->operator[](index);
-  }
-
-  /**
-   * Sets the value at the given index with bound checking.
-   */
-  void at(int64_t index, T const& value) {
-    if (index < 0 || index >= (length_ - offset_)) {
-      throw std::out_of_range("Index is out of bounds");
-    }
-
-    this->operator[](index) = value;
-  }
-
-  /**
-   * Iterates through each value in this array. 
-   */
-  void for_each(std::function<void(T)> const& lambda) const {
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      lambda(this->operator[](i));
-    }
-  }
-
-  /**
-   * Iterates through each value in this array. 
-   */
-  void for_each(std::function<void(T, int64_t)> const& lambda) const {
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      lambda(this->operator[](i), i);
-    }
-  }
-
-  /**
-   * Filters this array and returns a new array based on a condition.
-   */
-  array<T> filter(std::function<bool(T)> const& lambda) const {
-    array<T> temp;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      if (lambda(this->operator[](i))) {
-        temp.push(this->operator[](i));
-      }
-    }
-    return temp;
-  }
-
-  /**
-   * Filters this array and returns a new array based on a condition.
-   */
-  array<T> filter(std::function<bool(T, int64_t)> const& lambda) const {
-    array<T> temp;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      if (lambda(this->operator[](i), i)) {
-        temp.push(this->operator[](i));
-      }
-    }
-    return temp;
-  }
-
-  /**
-   *Maps each value in this array and returns a new array of type T.
-   */
-  array<T> map(std::function<T(T)> const& lambda) const {
-    array<T> temp;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      temp.push(lambda(this->operator[](i)));
-    }
-    return temp;
-  }
-
-  /**
-   * Maps each value in this array and returns a new array of type T.
-   */
-  array<T> map(std::function<T(T, int64_t)> const& lambda) const {
-    array<T> temp;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      temp.push(lambda(this->operator[](i), i));
-    }
-    return temp;
-  }
-
-  /**
-   * Maps each value in this array and returns a new array of type U.
-   */
-  template <typename U>
-  array<U> map(std::function<U(T)> const& lambda) const {
-    array<U> temp;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      temp.push(lambda(this->operator[](i)));
-    }
-    return temp;
-  }
-
-  /**
-   *Maps each value in this array and returns a new array of type U.
-   */
-  template <typename U>
-  array<U> map(std::function<U(T, int64_t)> const& lambda) const {
-    array<U> temp;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      temp.push(lambda(this->operator[](i), i));
-    }
-    return temp;
-  }
-
-  /**
-    * Reduces the values in this array into a single output value of type T.
-    */
-  T reduce(std::function<T(T, T)> const& lambda) const {
-    T value = this->operator[](0);
-    for (auto i = 1; i < (length_ - offset_); i++) {
-      value = lambda(value, this->operator[](i));
-    }
-    return value;
-  }
-
-  /**
-     * Reduces the values in this array into a single output value of type T.
-     */
-  T reduce(std::function<T(T, T, int64_t)> const& lambda) const {
-    T value = this->operator[](0);
-    for (auto i = 1; i < (length_ - offset_); i++) {
-      value = lambda(value, this->operator[](i), i);
-    }
-    return value;
-  }
-
-  /**
-     * Reduces the values in this array into a single output value of type T.
-     */
-  T reduce(std::function<T(T, T)> const& lambda, T initial) const {
-    T value = initial;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      value = lambda(value, this->operator[](i));
-    }
-    return value;
-  }
-
-  /**
-     * Reduces the values in this array into a single output value of type T.
-     */
-  T reduce(std::function<T(T, T, int64_t)> const& lambda, T initial) const {
-    T value = initial;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      value = lambda(value, this->operator[](i), i);
-    }
-    return value;
-  }
-
-  /**
-     * Reduces the values in this array into a single output value of type U.
-     */
-  template <typename U>
-  U reduce(std::function<U(U, T)> const& lambda, U initial) const {
-    U value = initial;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      value = lambda(value, this->operator[](i));
-    }
-    return value;
-  }
-
-  /**
-     * Reduces the values in this array into a single output value of type U.
-     */
-  template <typename U>
-  U reduce(std::function<U(U, T, int64_t)> const& lambda, U initial) const {
-    U value = initial;
-    for (auto i = 0; i < (length_ - offset_); i++) {
-      value = lambda(value, this->operator[](i), i);
-    }
-    return value;
-  }
-
-  /**
-   * Reverses the values in this array and returns a new array.
-   */
-  array<T> reverse() const {
-    array<T> temp(this->length_ - this->offset_);
-    auto index = 0;
-    for (auto i = (length_ - offset_); (i--) > 0;) {
-      temp[index++] = this->operator[](i);
-    }
-    return temp;
-  }
-
-  /**
-   * Returns a new array with the values from the specified index.
-   */
-  array<T> slice(int64_t index) const {
-    return slice(index, (length_ - offset_));
-  }
-
-  /**
-   * Returns a new array with the values from the specified range.
-   */
-  array<T> slice(int64_t begin, int64_t end) const {
-    int64_t len = length_ - offset_;
-    begin = (begin >= 0) ? begin : std::max(int64_t(0), len + begin);
-    end = (end <= len) ? end : std::min(end, len);
-
-    if (end < 0) {
-      end = len + end;
-    }
-
-    auto capacity = end - begin;
-
-    array<T> temp(capacity);
-    for (auto i = 0; i < capacity; i++) {
-      temp[i] = this->operator[](begin + i);
-    }
-    return temp;
-  }
-
-  /**
-   * Returns a std::string of this array using ',' as the default seperator.
-   */
-  std::string join() const {
-    return this->join(",");
-  }
-
-  /**
-   * Returns a std::string of this array using a provided seperator.
-   */
-  std::string join(const std::string& seperator) const {
-    std::string result = "";
-    this->for_each([&](T x, auto i) {
-      std::string y = stdlib::to_string(x);
-      if (is_string::value) {
-        y = "\"" + stdlib::to_string(x) + "\"";
-      }
-      result += (y + ((i == (length_ - offset_) - 1) ? "" : seperator));
-    });
     return result;
   }
-
   /**
-   * Allocates space on the heap.
+   * @brief Multiplies the array by a scalar and assigns the result to this array.
+   * 
+   * @param n The scalar to multiply by.
+   * @return Reference to this array.
    */
-  void reserve(uint64_t capacity) {
-    reserve(capacity, false);
+  array& operator*=(size_type n) {
+    *this = *this * n;
+    return *this;
+  }
+  /**
+   * @brief Concatenates this array with another array.
+   * 
+   * @param other The array to concatenate with.
+   * @return A new array with the elements of both arrays.
+   */
+  array operator+(const array& other) const {
+    array result;
+    result.reserve(size() + other.size());
+    result.insert(result.end(), begin(), end());
+    result.insert(result.end(), other.begin(), other.end());
+    return result;
+  }
+  /**
+   * @brief Concatenates another array to this array.
+   * 
+   * @param other The array to concatenate.
+   * @return Reference to this array.
+   */
+  array& operator+=(const array& other) {
+    insert(end(), other.begin(), other.end());
+    return *this;
+  }
+  /**
+   * @brief Compares this array with another array for equality.
+   * 
+   * @param other The array to compare with.
+   * @return True if the arrays are equal, false otherwise.
+   */
+  bool operator==(const array& other) const {
+    return std::equal(begin(), end(), other.begin(), other.end());
+  }
+  /**
+   * @brief Compares this array with another array.
+   * 
+   * @param other The array to compare with.
+   * @return The result of the comparison.
+   */
+  auto operator<=>(const array& other) const {
+    return std::lexicographical_compare_three_way(begin(), end(), other.begin(), other.end());
+  }
+  /**
+   * @brief Outputs the array to a stream.
+   * 
+   * @param os The output stream.
+   * @param arr The array to output.
+   * @return The output stream.
+   */
+  friend std::ostream& operator<<(std::ostream& os, const array& arr) {
+    os << "[ " << arr.join(", ") << " ]";
+    return os;
+  }
+  /**
+   * @brief Adds an element to the beginning of the array.
+   * 
+   * @param value The value to add.
+   */
+  void unshift(const T& value) {
+    if (offset_ > 0) {
+      array_[--offset_] = value;
+      ++length_;
+    } else {
+      size_type new_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
+      reserve(new_capacity);
+      std::shift_right(begin(), end(), 1);
+      array_[0] = value;
+      ++length_;
+    }
   }
 
   /**
-   * Allocates space on the heap.
+   * @brief Removes and returns the first element of the array.
+   * 
+   * @return The first element of the array.
+   * @throws std::out_of_range If the array is empty.
    */
-  void reserve(uint64_t capacity, bool copy) {
-    T* array = new T[capacity];
-
-    if (copy) {
-      for (auto i = offset_; i < capacity_; i++) {
-        array[i] = this->operator[](i);
+  T shift() {
+    if (empty()) {
+      throw std::out_of_range("Array is empty");
+    }
+    T value = std::move(array_[offset_]);
+    ++offset_;
+    --length_;
+    return value;
+  }
+  /**
+   * @brief Adds an element to the end of the array.
+   * 
+   * @param value The value to add.
+   */
+  void push(const T& value) {
+    if (length_ == capacity_) {
+      size_type new_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
+      reserve(new_capacity);
+    }
+    array_[length_++] = value;
+  }
+  /**
+   * @brief Removes and returns the last element of the array.
+   * 
+   * @return The last element of the array.
+   * @throws std::out_of_range If the array is empty.
+   */
+  T pop() {
+    if (empty()) {
+      throw std::out_of_range("Array is empty");
+    }
+    return std::move(array_[--length_]);
+  }
+  /**
+   * @brief Accesses an element by index with bounds checking.
+   * 
+   * @param index The index of the element.
+   * @return Reference to the element.
+   * @throws std::out_of_range If the index is out of bounds.
+   */
+  reference at(difference_type index) {
+    if (index < 0 || static_cast<size_type>(index) >= size()) {
+      throw std::out_of_range("Index out of bounds");
+    }
+    return (*this)[index];
+  }
+  /**
+   * @brief Accesses an element by index with bounds checking (const version).
+   * 
+   * @param index The index of the element.
+   * @return Constant reference to the element.
+   * @throws std::out_of_range If the index is out of bounds.
+   */
+  const_reference at(difference_type index) const {
+    if (index < 0 || static_cast<size_type>(index) >= size()) {
+      throw std::out_of_range("Index out of bounds");
+    }
+    return (*this)[index];
+  }
+  /**
+   * @brief Applies a function to each element of the array.
+   * 
+   * @param f The function to apply.
+   */
+  void for_each(const std::function<void(T)>& f) const {
+    std::for_each(begin(), end(), f);
+  }
+  /**
+   * @brief Applies a function to each element of the array, passing the index as well.
+   * 
+   * @param f The function to apply.
+   */
+  void for_each(const std::function<void(T, size_type)>& f) const {
+    for (size_type i = 0; i < size(); ++i) {
+      f((*this)[i], i);
+    }
+  }
+  /**
+   * @brief Filters the array using a predicate.
+   * 
+   * @tparam Pred The type of the predicate.
+   * @param pred The predicate to use for filtering.
+   * @return A new array with the elements that satisfy the predicate.
+   */
+  template <std::invocable<T> Pred>
+  array filter(Pred pred) const {
+    return array(std::ranges::filter_view(std::ranges::subrange(begin(), end()), pred));
+  }
+  /**
+   * @brief Filters the array using a predicate, passing the index as well.
+   * 
+   * @tparam Pred The type of the predicate.
+   * @param pred The predicate to use for filtering.
+   * @return A new array with the elements that satisfy the predicate.
+   */
+  template <std::invocable<T, size_type> Pred>
+  array filter(Pred pred) const {
+    array result;
+    for (size_type i = 0; i < size(); ++i) {
+      if (pred((*this)[i], i)) {
+        result.push((*this)[i]);
       }
     }
-
-    delete[] array_;
-
-    length_ = length_ - offset_;
-    offset_ = 0;
-    capacity_ = capacity;
-    array_ = array;
+    return result;
+  }
+  /**
+   * @brief Maps the array using a function.
+   * 
+   * @tparam F The type of the function.
+   * @param f The function to use for mapping.
+   * @return A new array with the mapped elements.
+   */
+  template <std::invocable<T> F>
+  auto map(F f) const -> array<std::invoke_result_t<F, T>> {
+    return array<std::invoke_result_t<F, T>>(std::ranges::transform_view(std::ranges::subrange(begin(), end()), f));
+  }
+  /**
+   * @brief Maps the array using a function, passing the index as well.
+   * 
+   * @tparam F The type of the function.
+   * @param f The function to use for mapping.
+   * @return A new array with the mapped elements.
+   */
+  template <std::invocable<T, size_type> F>
+  auto map(F f) const -> array<std::invoke_result_t<F, T, size_type>> {
+    array<std::invoke_result_t<F, T, size_type>> result;
+    result.reserve(size());
+    for (size_type i = 0; i < size(); ++i) {
+      result.push(f((*this)[i], i));
+    }
+    return result;
+  }
+  /**
+   * @brief Reduces the array to a single value using a function.
+   * 
+   * @tparam U The type of the result.
+   * @param f The function to use for reducing.
+   * @param initial The initial value.
+   * @return The reduced value.
+   */
+  template <typename U>
+  U reduce(const std::function<U(U, T)>& f, U initial) const {
+    return std::accumulate(begin(), end(), initial, f);
+  }
+  /**
+   * @brief Reduces the array to a single value using a function.
+   * 
+   * @tparam Func The type of the function.
+   * @param func The function to use for reducing.
+   * @param initial The initial value.
+   * @return The reduced value.
+   */
+  template <typename Func>
+  T reduce(Func func, T initial) const {
+    T accumulator = initial;
+    for (uint64_t i = 0; i < length_; ++i) {
+      accumulator = func(accumulator, array_[i]);
+    }
+    return accumulator;
+  }
+  /**
+   * @brief Reverses the array.
+   * 
+   * @return A new array with the elements in reverse order.
+   */
+  array reverse() const {
+    array result(*this);
+    std::ranges::reverse(result);
+    return result;
+  }
+  /**
+   * @brief Slices the array.
+   * 
+   * @param start The start index.
+   * @param end The end index (default is -1, which means the end of the array).
+   * @return A new array with the sliced elements.
+   */
+  array slice(difference_type start, difference_type end = -1) const {
+    if (end < 0) end += size();
+    start = std::clamp<difference_type>(start, 0, size());
+    end = std::clamp<difference_type>(end, start, size());
+    return array(begin() + start, begin() + end);
+  }
+  /**
+   * @brief Joins the elements of the array into a string.
+   * 
+   * @param sep The separator to use (default is ",").
+   * @return A string with the joined elements.
+   */
+  std::string join(std::string_view sep = ",") const {
+    return std::accumulate(begin(), end(), std::string {},
+      [&sep](const std::string& a, const T& b) {
+        return a.empty() ? to_string(b) : a + std::string(sep) + to_string(b);
+      });
+  }
+  /**
+   * @brief Reserves memory for the array.
+   * 
+   * @param new_capacity The new capacity of the array.
+   */
+  void reserve(size_type new_capacity) {
+    if (new_capacity > capacity_) {
+      auto new_array = std::make_unique<T[]>(new_capacity);
+      std::copy_n(array_.get() + offset_, size(), new_array.get());
+      array_ = std::move(new_array);
+      capacity_ = new_capacity;
+      length_ -= offset_;
+      offset_ = 0;
+    }
   }
 
   /**
-   * Return the number of elements in the array.
+   * @brief Inserts elements into the array at a specified position.
+   * 
+   * This function inserts a range of elements into the array at the specified position.
+   * If the current capacity is insufficient to accommodate the new elements, the array
+   * is reallocated with a larger capacity.
+   * 
+   * @tparam InputIt The type of the input iterator.
+   * @param pos The position to insert at. This must be a valid iterator within the array.
+   * @param first The first iterator of the range to insert.
+   * @param last The last iterator of the range to insert.
+   * 
+   * @pre `pos` must be a valid iterator within the array.
+   * @pre The range `[first, last)` must be a valid range.
+   * 
+   * @post The elements in the range `[first, last)` are inserted at the position `pos`.
+   *       The size of the array is increased by the number of elements inserted.
+   * 
+   * @throws std::bad_alloc if memory allocation fails.
+   * 
+   * @note If the array is reallocated, all iterators, pointers, and references to elements
+   *       in the array are invalidated.
    */
-  int64_t length() const {
-    return length_ - offset_;
+  template <typename InputIt>
+  void insert(const_iterator pos, InputIt first, InputIt last) {
+    size_type n = std::distance(first, last);
+    assert(pos >= begin() && pos <= end()); // Ensure pos is within valid range
+    auto pos_index = pos - begin();
+    if (size() + n > capacity_) {
+      reserve((size() + n) * 2);
+      pos = begin() + pos_index; // Update pos after reserve
+    }
+    pos_index = pos - begin();
+    assert(pos_index + n <= capacity_); // Ensure we don't move elements out of bounds
+    std::move_backward(begin() + pos_index, end(), end() + n);
+    std::copy(first, last, begin() + pos_index);
+    length_ += n;
   }
 
   /**
-   * Returns the number of elements in the array.
-   * [Alias]
+   * @brief Inserts an element into the array at a specified position.
+   * 
+   * This function inserts an element into the array at the specified position.
+   * If the current capacity is insufficient to accommodate the new element, the array
+   * is reallocated with a larger capacity.
+   * 
+   * @param pos The position to insert at. This must be a valid iterator within the array.
+   * @param value The value to insert.
+   * 
+   * @pre `pos` must be a valid iterator within the array.
+   * 
+   * @post The element `value` is inserted at the position `pos`.
+   *       The size of the array is increased by one.
+   * 
+   * @throws std::bad_alloc if memory allocation fails.
+   * 
+   * @note If the array is reallocated, all iterators, pointers, and references to elements
+   *       in the array are invalidated.
    */
-  int64_t size() const {
-    return length();
-  }
-
-  /**
-   * Returns the heap capacity of the array.
-   */
-  int64_t capacity() const {
-    return capacity_;
-  }
-
-  /**
-   * Determine whether the array is empty.
-   */
-  bool is_empty() const {
-    return begin() == end();
-  }
-
-  /**
-   * Determine whether the array is empty.
-   * [Alias]
-   */
-  bool empty() const {
-    return is_empty();
-  }
-
-  /**
-   * Determine whether the array is full.
-   */
-  bool is_full() const {
-    return (length_ - offset_) == capacity_;
-  }
-
-  /**
-   * Determine whether the array is full.
-   */
-  bool full() const {
-    return is_full();
-  }
-
-  /**
-   * Returns an iterator pointing to the first element in the array.
-   */
-  iterator begin() {
-    return iterator(array_ + offset_);
-  }
-
-  /**
-   * Returns an const_iterator pointing to the first element in the array.
-   */
-  const_iterator begin() const {
-    return const_iterator(array_ + offset_);
-  }
-
-  /**
-   * Returns an iterator referring to the past-the-end element in the array container.
-   */
-  iterator end() {
-    return iterator(array_ + (length_ - offset_));
-  }
-
-  /**
-   * Returns an iterator referring to the past-the-end element in the array container.
-   */
-  const_iterator end() const {
-    return const_iterator(array_ + (length_ - offset_));
-  }
-};
+  void insert(const_iterator pos, const T& value) {
+    assert(pos >= begin() && pos <= end()); // Ensure pos is within valid range
+    auto pos_index = pos - begin();
+    if (size() + 1 > capacity_) {
+        reserve((size() + 1) * 2);
+        pos = begin() + pos_index; // Update pos after reserve
+    }
+    pos_index = pos - begin();
+    // Shift elements to the right
+    std::move_backward(begin() + pos_index, end(), end() + 1);
+    // Insert the new element
+    array_[pos_index] = value;
+    ++length_;
 }
 
-#endif
+  /// @return The the size of the array.
+  [[nodiscard]] size_type size() const noexcept { return length_ - offset_; }
+  /// @return The capacity of the array.
+  [[nodiscard]] size_type capacity() const noexcept { return capacity_; }
+  /// @brief Determines if the array is empty. 
+  [[nodiscard]] bool empty() const noexcept { return size() == 0; }
+  /// @brief Determines if the array is full.
+  [[nodiscard]] bool full() const noexcept { return size() == capacity_; }
+  /// @return An iterator to the beginning of the array.
+  iterator begin() noexcept { return array_.get() + offset_; }
+  /// @return A const iterator to the beginning of the array.
+  const_iterator begin() const noexcept { return array_.get() + offset_; }
+  /// @return An iterator to the end of the array.
+  iterator end() noexcept { return array_.get() + length_; }
+  /// @return A const iterator to the end of the array.
+  const_iterator end() const noexcept { return array_.get() + length_; }
+
+  private:
+  template <typename U>
+  static std::string to_string(const U& value) {
+        if constexpr (is_string) {
+            return fmt::format("\"{}\"", value);
+        } else {
+            return fmt::format("{}", value);
+        }
+    }
+};
+
+} // namespace stdlib
+
+#endif // STD_LIB_ARRAY_H
