@@ -1,0 +1,5 @@
+if(EXISTS "/home/runner/work/array/array/_codeql_build_dir/test_runner-b12d07c_tests.cmake")
+  include("/home/runner/work/array/array/_codeql_build_dir/test_runner-b12d07c_tests.cmake")
+else()
+  add_test(test_runner_NOT_BUILT-b12d07c test_runner_NOT_BUILT-b12d07c)
+endif()

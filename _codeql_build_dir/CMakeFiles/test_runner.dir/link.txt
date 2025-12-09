@@ -1,0 +1,1 @@
+/home/runner/work/array/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/test_runner.dir/link.d CMakeFiles/test_runner.dir/test/array_tests.cpp.o -o test_runner  _deps/catch2-build/src/libCatch2Main.a _deps/fmt-build/libfmt.a _deps/catch2-build/src/libCatch2.a
