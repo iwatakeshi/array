@@ -654,7 +654,7 @@ class array {
     return array_.get() + offset_ + length_;
   }
   /// @return A const iterator to the end of the array.
-  const_iterator end() const noexcept { return array_.get() + length_; }
+  const_iterator end() const noexcept { return array_.get() + offset_ + length_; }
 
   private:
   template <typename U>

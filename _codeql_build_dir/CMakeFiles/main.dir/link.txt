@@ -1,0 +1,1 @@
+/home/runner/work/array/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/main.dir/link.d CMakeFiles/main.dir/main.cpp.o -o main  _deps/fmt-build/libfmt.a
