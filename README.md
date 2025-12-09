@@ -9,7 +9,7 @@ This project uses CMake as its build system. A Makefile is provided for convenie
 
 ### Prerequisites
 
-- C++ compiler with C++20 support
+- C++ compiler with C++23 support
 - CMake (version 3.10 or higher)
 - Make (optional, for using the provided Makefile)
 
